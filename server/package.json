@@ -6,7 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "start": "nodemon",
-    "build": "npm install && cd ../client && npm install && npm run build"
+    "build": "npm install && cd ../client && npm install && npm run build",
+    "dev": "node src/server.ts"
   },
   "author": "",
   "license": "ISC",
