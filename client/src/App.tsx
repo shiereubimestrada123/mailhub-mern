@@ -1,24 +1,32 @@
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-  RouterProvider,
-} from 'react-router-dom';
-import { AuthPage, EmailPage } from '@/pages';
-
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route>
-      <Route path='/auth' element={<AuthPage />} />
-      <Route path='/email' element={<EmailPage />} />
-    </Route>
-  )
-);
+import { useEffect } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { Toast } from '@components';
+import { useAuthStore } from '@store';
 
 function App() {
+  const navigate = useNavigate();
+  const toast = useAuthStore((state) => state.toast);
+  const setToast = useAuthStore((state) => state.setToast);
+
+  useEffect(() => {
+    if (window.location.pathname === '/') navigate('/account');
+  }, []);
+
+  const handleToastClose = () => {
+    setToast({ success: false, message: '' });
+  };
+
   return (
     <div data-theme='light'>
-      <RouterProvider router={router} />
+      {!!toast.message && (
+        <Toast
+          position='toast-top toast-center'
+          alertType={toast.success}
+          message={toast.message}
+          onClose={handleToastClose}
+        />
+      )}
+      <Outlet />
     </div>
   );
 }

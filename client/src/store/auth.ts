@@ -1,13 +1,21 @@
 import { create } from 'zustand';
 
-type AuthState = {
-  // isLogin: boolean;
-  // setIsLogin: (isLogin: boolean) => void;
+type ToastData = {
+  success: boolean;
+  message: string;
+  email?: string;
+  // Add other properties as needed
 };
 
-export const useAuthStore = create<AuthState>()((set) => ({
-  // isLogin: false,
-  // setIsLogin: () => {
-  //   set(() => ({ isLogin: true }));
-  // },
+type AccountState = {
+  toast: ToastData;
+  setToast: (value: ToastData) => void;
+};
+
+export const useAuthStore = create<AccountState>((set) => ({
+  toast: {
+    success: false,
+    message: '',
+  },
+  setToast: (value) => set({ toast: value }),
 }));

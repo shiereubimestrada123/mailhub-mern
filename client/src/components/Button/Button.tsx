@@ -3,6 +3,7 @@ type ButtonProps = {
   type?: 'button' | 'submit' | 'reset';
   className?: string;
   children?: React.ReactNode;
+  disabled?: boolean;
 };
 
 export function Button({
@@ -10,9 +11,15 @@ export function Button({
   type = 'button',
   children,
   className,
+  disabled,
 }: ButtonProps) {
   return (
-    <button type={type} className={className} onClick={onClick}>
+    <button
+      type={type}
+      className={className}
+      disabled={disabled}
+      onClick={onClick}
+    >
       {children}
     </button>
   );

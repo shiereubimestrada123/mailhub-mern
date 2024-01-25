@@ -1,5 +1,14 @@
 {
-  "cSpell.words": ["luxon", "tailwindcss"],
+  "cSpell.words": [
+    "luxon",
+    "tailwindcss",
+    "clsx",
+    "daisyui",
+    "zustand",
+    "useUdsoStore",
+    "hookform",
+    "tanstack"
+  ],
   "files.associations": {
     "*.css": "tailwindcss",
     ".env.*": "properties"

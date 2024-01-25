@@ -3,7 +3,7 @@ import { Login, Register } from '@features';
 import { IconWrapper } from '@components';
 import { useState } from 'react';
 
-export function AuthPage() {
+export function AccountPage() {
   const [isLogin, setIsLogin] = useState(true);
 
   return (
