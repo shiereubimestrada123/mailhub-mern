@@ -1,4 +1,4 @@
-import { Button, Input } from '@components';
+import { Button } from '@components';
 
 export function Login() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -8,14 +8,8 @@ export function Login() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Input
-        labelText='Email'
-        inputProps={{ type: 'text', placeholder: 'Enter your email' }}
-      />
-      <Input
-        labelText='Password'
-        inputProps={{ type: 'text', placeholder: 'Enter your password' }}
-      />
+      <input type='text' />
+      <input type='text' />
       <Button
         type='submit'
         className='my-3 text-slate-100 btn btn-block btn-active btn-primary'
