@@ -7,7 +7,8 @@ function App() {
   const navigate = useNavigate();
   const toast = useAuthStore((state) => state.toast);
   const setToast = useAuthStore((state) => state.setToast);
-
+  const token = useAuthStore((state) => state.token);
+  console.log(token);
   useEffect(() => {
     if (window.location.pathname === '/') navigate('/account');
   }, []);

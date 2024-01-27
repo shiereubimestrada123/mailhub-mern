@@ -1,7 +1,8 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import Account from '../models/Account';
+import { generateToken } from './../middleware/authToken';
 
 export async function register(request: Request, response: Response) {
   try {
@@ -51,5 +52,44 @@ export async function register(request: Request, response: Response) {
       success: false,
       message: 'Internal server error',
     });
+  }
+}
+
+export async function login(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  try {
+    const validationErrors = validationResult(request);
+    if (!validationErrors.isEmpty())
+      return response.status(400).json({
+        success: false,
+        message: 'Invalid data, see response.data.errors for more information',
+        errors: validationErrors.array(),
+      });
+
+    const foundAccount = await Account.findOne({ email: request.body.email });
+    if (!foundAccount)
+      return response
+        .status(401)
+        .json({ success: false, message: 'Bad credentials' });
+
+    const isPasswordOk = await bcrypt.compare(
+      request.body.password,
+      foundAccount.password
+    );
+    if (!isPasswordOk)
+      return response
+        .status(401)
+        .json({ success: false, message: 'Bad credentials' });
+
+    const token = generateToken(foundAccount._id);
+    response
+      .status(200)
+      .json({ success: true, message: 'Login success', token });
+  } catch (error) {
+    console.log(error);
+    response.status(500);
   }
 }

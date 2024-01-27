@@ -19,3 +19,10 @@ export const registerValidations = [
     return true;
   }),
 ];
+
+export const loginValidations = [
+  check('email', 'Email is not valid').exists().isEmail(),
+  check('password', 'Password must be over 7 characters')
+    .exists()
+    .isLength({ min: 7 }),
+];

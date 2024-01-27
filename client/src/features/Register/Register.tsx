@@ -1,7 +1,6 @@
 import { useRef } from 'react';
 import axios from 'axios';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { DevTool } from '@hookform/devtools';
 import { useMutation } from '@tanstack/react-query';
 import { Button, Input } from '@components';
 import { useAuthStore } from '@store';
@@ -21,9 +20,18 @@ export function Register() {
     register,
     handleSubmit,
     watch,
-    control,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterProps>();
+    reset,
+  } = useForm<RegisterProps>({
+    defaultValues: {
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
 
   const setToast = useAuthStore((state) => state.setToast);
 
@@ -42,6 +50,8 @@ export function Register() {
       setToast(response);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) setToast(error?.response?.data);
+    } finally {
+      reset();
     }
   };
 
@@ -172,7 +182,6 @@ export function Register() {
           Register
         </Button>
       </form>
-      <DevTool control={control} />
     </>
   );
 }

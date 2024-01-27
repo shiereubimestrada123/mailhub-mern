@@ -4,12 +4,14 @@ type ToastData = {
   success: boolean;
   message: string;
   email?: string;
-  // Add other properties as needed
 };
 
 type AccountState = {
   toast: ToastData;
   setToast: (value: ToastData) => void;
+
+  token: string;
+  setToken: (value: string) => void;
 };
 
 export const useAuthStore = create<AccountState>((set) => ({
@@ -17,5 +19,11 @@ export const useAuthStore = create<AccountState>((set) => ({
     success: false,
     message: '',
   },
+  token: localStorage.getItem('token') ?? '',
+
   setToast: (value) => set({ toast: value }),
+  setToken: (value) => {
+    localStorage.setItem('token', value);
+    set({ token: value });
+  },
 }));
