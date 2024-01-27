@@ -1,10 +1,11 @@
 import { MdEmail } from 'react-icons/md';
 import { Login, Register } from '@features';
 import { IconWrapper } from '@components';
-import { useState } from 'react';
+import { useAuthStore } from '@store';
 
 export function AccountPage() {
-  const [isLogin, setIsLogin] = useState(true);
+  const setIsLogin = useAuthStore((state) => state.setIsLogin);
+  const isLogin = useAuthStore((state) => state.isLogin);
 
   return (
     <div className='flex flex-col items-center w-full h-full md:h-screen md:flex-row justify-evenly'>

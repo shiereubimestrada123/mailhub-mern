@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import Account from '../models/Account';
-import { generateToken } from './../middleware/authToken';
+import { generateToken, AuthenticatedRequest } from './../middleware/authToken';
 
 export async function register(request: Request, response: Response) {
   try {
@@ -55,11 +55,7 @@ export async function register(request: Request, response: Response) {
   }
 }
 
-export async function login(
-  request: Request,
-  response: Response,
-  next: NextFunction
-) {
+export async function login(request: Request, response: Response) {
   try {
     const validationErrors = validationResult(request);
     if (!validationErrors.isEmpty())
@@ -88,6 +84,22 @@ export async function login(
     response
       .status(200)
       .json({ success: true, message: 'Login success', token });
+  } catch (error) {
+    console.log(error);
+    response.status(500);
+  }
+}
+
+export async function getUser(
+  request: AuthenticatedRequest,
+  response: Response
+) {
+  try {
+    const foundAccount = await Account.findOne({ _id: request.user }).select(
+      '-password'
+    );
+
+    response.status(200).json({ message: 'Account found', user: foundAccount });
   } catch (error) {
     console.log(error);
     response.status(500);

@@ -25,9 +25,9 @@ db.once('error', (error: Error) => console.log(error));
 
 app.use('/api/account', accountRoutes);
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello, Express with TypeScript!');
-});
+// app.get('/', (req: Request, res: Response) => {
+//   res.send('Hello, Express with TypeScript!');
+// });
 
 const port = process.env.PORT || 5000;
 

@@ -34,6 +34,7 @@ export function Register() {
   });
 
   const setToast = useAuthStore((state) => state.setToast);
+  const setIsLogin = useAuthStore((state) => state.setIsLogin);
 
   const password = useRef<string>('');
   password.current = watch('password', '');
@@ -48,6 +49,7 @@ export function Register() {
     try {
       const response = await mutateAsync(data as any);
       setToast(response);
+      setIsLogin(true);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) setToast(error?.response?.data);
     } finally {
