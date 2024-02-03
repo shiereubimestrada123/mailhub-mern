@@ -1,3 +1,13 @@
+import { EmailView, Header, Sidebar } from "@features";
+
 export function EmailPage() {
-  return <div>EmailPage</div>;
+  return (
+    <div className="">
+      <Header />
+      <main className="flex w-full">
+        <Sidebar />
+        <EmailView />
+      </main>
+    </div>
+  );
 }

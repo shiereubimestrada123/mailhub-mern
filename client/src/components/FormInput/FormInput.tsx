@@ -1,5 +1,6 @@
-import { ErrorMsg } from '@components';
-import { UseFormRegisterReturn } from 'react-hook-form';
+import { UseFormRegisterReturn } from "react-hook-form";
+import { ErrorMsg } from "@components";
+import { cn } from "@utils";
 
 type InputProps = {
   htmlFor?: string;
@@ -7,14 +8,15 @@ type InputProps = {
   id?: string;
   type?: string;
   placeholder?: string;
-  register: UseFormRegisterReturn;
+  register?: UseFormRegisterReturn;
   errorRequired?: string | boolean | undefined;
   errorPattern?: string | boolean | undefined;
   errorMinLength?: string | number | boolean | undefined;
   errorValidate?: string | boolean | undefined;
+  classInput?: string;
 };
 
-export function Input({
+export function FormInput({
   htmlFor,
   labelText,
   id,
@@ -25,17 +27,18 @@ export function Input({
   errorPattern,
   errorMinLength,
   errorValidate,
+  classInput,
 }: InputProps) {
   return (
-    <label htmlFor={htmlFor} className='w-full max-w-xs form-control'>
-      <div className='label'>
-        <span className='label-text'>{labelText}</span>
+    <label htmlFor={htmlFor} className="w-full max-w-xs form-control">
+      <div className="label">
+        <span className="label-text">{labelText}</span>
       </div>
       <input
         id={id}
         type={type}
         placeholder={placeholder}
-        className='w-full max-w-xs input input-bordered'
+        className={classInput}
         {...register}
       />
       <ErrorMsg
