@@ -66,6 +66,7 @@ export function Register() {
           id="firstName"
           type="text"
           placeholder="Enter your first name"
+          classInput="w-full max-w-xs input input-bordered"
           register={register("firstName", {
             required: {
               value: true,
@@ -86,6 +87,7 @@ export function Register() {
           id="middleName"
           type="text"
           placeholder="Enter your middle name"
+          classInput="w-full max-w-xs input input-bordered"
           register={register("middleName", {
             pattern: /^[a-zA-Z ]+$/,
           })}
@@ -99,6 +101,7 @@ export function Register() {
           id="lastName"
           type="text"
           placeholder="Enter your last name"
+          classInput="w-full max-w-xs input input-bordered"
           register={register("lastName", {
             required: {
               value: true,
@@ -119,6 +122,7 @@ export function Register() {
           id="email"
           type="email"
           placeholder="Enter your email"
+          classInput="w-full max-w-xs input input-bordered"
           register={register("email", {
             required: {
               value: true,
@@ -138,6 +142,7 @@ export function Register() {
           id="password"
           type="password"
           placeholder="Enter your password"
+          classInput="w-full max-w-xs input input-bordered"
           register={register("password", {
             required: {
               value: true,
@@ -159,6 +164,7 @@ export function Register() {
           id="confirmPassword"
           type="password"
           placeholder="Enter again your password"
+          classInput="w-full max-w-xs input input-bordered"
           register={register("confirmPassword", {
             required: {
               value: true,
