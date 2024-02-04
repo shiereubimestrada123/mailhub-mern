@@ -39,7 +39,7 @@ export function Login() {
       const response = await mutateAsync(data as any);
       setToken(response.token);
       setToast(response);
-      navigate("/email");
+      navigate("/email/inbox");
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) setToast(error?.response?.data);
     } finally {
