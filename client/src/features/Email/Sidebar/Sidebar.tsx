@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 import { MdAllInbox, MdDrafts } from "react-icons/md";
 import { FaStar, FaTrash } from "react-icons/fa";
 import { IoMdSend } from "react-icons/io";
 import { FaChevronRight, FaChevronDown } from "react-icons/fa";
 import { Button } from "@components";
-import { EmailInbox, EmailStarred } from ".";
+import { SidebarItem } from "./SidebarItem";
 
 const sidebarItems = [
   { icon: <MdAllInbox />, label: "inbox" },
@@ -15,51 +14,18 @@ const sidebarItems = [
   { icon: <FaTrash />, label: "trash" },
 ];
 
-type SidebarItemProps = {
-  item: { icon: JSX.Element; label: string };
-  index: number;
-  // selectedIdx: number;
+type SidebarProps = {
   selectedItem: string;
-  // handleItemClick: (index: number, label: string) => void;
-  handleItemClick: (label: string) => void;
+  onItemClick: (label: string) => void;
 };
 
-const SidebarItem = ({
-  item,
-  index,
-  // selectedIdx,
-  selectedItem,
-  handleItemClick,
-}: SidebarItemProps) => (
-  <div
-    key={index}
-    className={`flex justify-between items-center w-full h-10 p-2 cursor-pointer rounded ${
-      // selectedIdx === index ? "bg-primary" : "hover:bg-info"
-      selectedItem === item.label ? "bg-primary" : "hover:bg-info"
-    }`}
-    // onClick={() => handleItemClick(index, item.label)}
-    onClick={() => handleItemClick(item.label)}
-  >
-    <div className="flex items-center gap-2">
-      {item.icon}
-      <p>{item.label.charAt(0).toUpperCase() + item.label.slice(1)}</p>
-    </div>
-    {index === 0 && <p>10</p>}
-  </div>
-);
-export function Sidebar({ selectedItem, onItemClick }: any) {
+export function Sidebar({ selectedItem, onItemClick }: SidebarProps) {
   const [showMore, setShowMore] = useState(false);
-  // const [selectedIdx, setSelectedIdx] = useState<number>(0);
-  // const [selectedItem, setSelectedItem] = useState("inbox");
-  // const navigate = useNavigate();
 
   const toggleShowMore = () => setShowMore(!showMore);
 
   const handleItemClick = (label: string) => {
-    // setSelectedIdx(index);
     onItemClick(label);
-    // setSelectedItem(label);
-    // navigate(`/email/${label}`);
   };
 
   return (
@@ -78,7 +44,6 @@ export function Sidebar({ selectedItem, onItemClick }: any) {
               key={index}
               item={item}
               index={index}
-              // selectedIdx={selectedIdx}
               selectedItem={selectedItem}
               handleItemClick={handleItemClick}
             />
@@ -97,14 +62,10 @@ export function Sidebar({ selectedItem, onItemClick }: any) {
             key={sidebarItems.length}
             item={sidebarItems[sidebarItems.length - 1]}
             index={sidebarItems.length - 1}
-            // selectedIdx={selectedIdx}
             selectedItem={selectedItem}
             handleItemClick={handleItemClick}
           />
         )}
-
-        {/* {selectedIdx === 0 && <EmailInbox />}
-        {selectedIdx === 1 && <EmailStarred />} */}
       </div>
     </section>
   );
