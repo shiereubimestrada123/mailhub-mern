@@ -13,7 +13,7 @@ function App() {
 
   useEffect(() => {
     if (!token) return navigate("/account");
-    navigate("/email");
+    navigate("/email/inbox");
   }, []);
 
   useEffect(() => {
