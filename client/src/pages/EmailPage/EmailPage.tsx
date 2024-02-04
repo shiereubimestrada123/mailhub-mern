@@ -19,7 +19,7 @@ export function EmailPage() {
           selectedItem={selectedItem}
           onItemClick={handleSidebarItemClick}
         />
-        <EmailView selectedItem={selectedItem} />
+        <EmailView />
       </main>
     </div>
   );
