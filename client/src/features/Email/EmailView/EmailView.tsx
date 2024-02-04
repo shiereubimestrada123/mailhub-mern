@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { Drafts, Inbox, Send, Starred, Trash } from "./Category";
 
-export function EmailView({ selectedItem }: any) {
+export function EmailView() {
   const { category = "inbox" } = useParams();
 
   const componentsByCategory: { [key: string]: JSX.Element } = {
