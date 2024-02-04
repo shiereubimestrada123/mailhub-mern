@@ -1,6 +1,5 @@
 import { UseFormRegisterReturn } from "react-hook-form";
 import { ErrorMsg } from "@components";
-import { cn } from "@utils";
 
 type InputProps = {
   htmlFor?: string;
