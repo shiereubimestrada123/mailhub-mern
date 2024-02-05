@@ -4,6 +4,7 @@ import { EmailView, Header, Sidebar } from "@features";
 
 export function EmailPage() {
   const [selectedItem, setSelectedItem] = useState("inbox");
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleSidebarItemClick = (label: string) => {
@@ -17,9 +18,10 @@ export function EmailPage() {
       <main className="flex w-full">
         <Sidebar
           selectedItem={selectedItem}
+          setIsOpen={setIsOpen}
           onItemClick={handleSidebarItemClick}
         />
-        <EmailView />
+        <EmailView isOpen={isOpen} setIsOpen={setIsOpen} />
       </main>
     </div>
   );

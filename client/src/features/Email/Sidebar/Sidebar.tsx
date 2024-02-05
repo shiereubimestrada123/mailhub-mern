@@ -17,9 +17,14 @@ const sidebarItems = [
 type SidebarProps = {
   selectedItem: string;
   onItemClick: (label: string) => void;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export function Sidebar({ selectedItem, onItemClick }: SidebarProps) {
+export function Sidebar({
+  selectedItem,
+  onItemClick,
+  setIsOpen,
+}: SidebarProps) {
   const [showMore, setShowMore] = useState(false);
 
   const toggleShowMore = () => setShowMore(!showMore);
@@ -33,6 +38,7 @@ export function Sidebar({ selectedItem, onItemClick }: SidebarProps) {
       <Button
         type="submit"
         className="mb-3 text-slate-100 btn btn-block btn-active btn-primary"
+        onClick={() => setIsOpen(true)}
       >
         Compose
       </Button>

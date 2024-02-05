@@ -13,6 +13,7 @@ type InputProps = {
   errorMinLength?: string | number | boolean | undefined;
   errorValidate?: string | boolean | undefined;
   classInput?: string;
+  classLabel?: string;
 };
 
 export function FormInput({
@@ -27,9 +28,10 @@ export function FormInput({
   errorMinLength,
   errorValidate,
   classInput,
+  classLabel,
 }: InputProps) {
   return (
-    <label htmlFor={htmlFor} className="w-full max-w-xs form-control">
+    <label htmlFor={htmlFor} className={classLabel}>
       <div className="label">
         <span className="label-text">{labelText}</span>
       </div>

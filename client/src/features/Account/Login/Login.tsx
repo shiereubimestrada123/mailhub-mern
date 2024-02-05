@@ -56,6 +56,7 @@ export function Login() {
           id="email"
           type="email"
           placeholder="Enter your email"
+          classLabel="w-full max-w-xs form-control"
           classInput="w-full max-w-xs input input-bordered"
           register={register("email", {
             required: {
@@ -76,6 +77,7 @@ export function Login() {
           id="password"
           type="password"
           placeholder="Enter your password"
+          classLabel="w-full max-w-xs form-control"
           classInput="w-full max-w-xs input input-bordered"
           register={register("password", {
             required: {

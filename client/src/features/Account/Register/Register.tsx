@@ -66,6 +66,7 @@ export function Register() {
           id="firstName"
           type="text"
           placeholder="Enter your first name"
+          classLabel="w-full max-w-xs form-control"
           classInput="w-full max-w-xs input input-bordered"
           register={register("firstName", {
             required: {
@@ -87,6 +88,7 @@ export function Register() {
           id="middleName"
           type="text"
           placeholder="Enter your middle name"
+          classLabel="w-full max-w-xs form-control"
           classInput="w-full max-w-xs input input-bordered"
           register={register("middleName", {
             pattern: /^[a-zA-Z ]+$/,
@@ -101,6 +103,7 @@ export function Register() {
           id="lastName"
           type="text"
           placeholder="Enter your last name"
+          classLabel="w-full max-w-xs form-control"
           classInput="w-full max-w-xs input input-bordered"
           register={register("lastName", {
             required: {
@@ -122,6 +125,7 @@ export function Register() {
           id="email"
           type="email"
           placeholder="Enter your email"
+          classLabel="w-full max-w-xs form-control"
           classInput="w-full max-w-xs input input-bordered"
           register={register("email", {
             required: {
@@ -142,6 +146,7 @@ export function Register() {
           id="password"
           type="password"
           placeholder="Enter your password"
+          classLabel="w-full max-w-xs form-control"
           classInput="w-full max-w-xs input input-bordered"
           register={register("password", {
             required: {
@@ -164,6 +169,7 @@ export function Register() {
           id="confirmPassword"
           type="password"
           placeholder="Enter again your password"
+          classLabel="w-full max-w-xs form-control"
           classInput="w-full max-w-xs input input-bordered"
           register={register("confirmPassword", {
             required: {
