@@ -12,9 +12,9 @@ export function EmailView() {
     trash: <Trash />,
   };
 
-  const componentToRender = componentsByCategory[category ?? "inbox"] || (
+  const categories = componentsByCategory[category ?? "inbox"] || (
     <div>No such category found</div>
   );
 
-  return <section className="w-5/6 p-2">{componentToRender}</section>;
+  return <section className="w-5/6 p-2">{categories}</section>;
 }

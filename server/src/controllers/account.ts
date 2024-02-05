@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from 'express';
-import { validationResult } from 'express-validator';
-import bcrypt from 'bcrypt';
-import Account from '../models/Account';
-import { generateToken, AuthenticatedRequest } from './../middleware/authToken';
+import { Request, Response } from "express";
+import { validationResult } from "express-validator";
+import bcrypt from "bcrypt";
+import Account from "../models/Account";
+import { generateToken, AuthenticatedRequest } from "./../middleware/authToken";
 
 export async function register(request: Request, response: Response) {
   try {
@@ -11,7 +11,7 @@ export async function register(request: Request, response: Response) {
     if (!validationErrors.isEmpty()) {
       return response.status(400).json({
         success: false,
-        message: 'Invalid data, see response.data.errors for more information',
+        message: "Invalid data, see response.data.errors for more information",
         errors: validationErrors.array(),
       });
     }
@@ -21,7 +21,7 @@ export async function register(request: Request, response: Response) {
     if (foundAccount) {
       return response.status(400).json({
         success: false,
-        message: 'Email is already taken',
+        message: "Email is already taken",
         email: foundAccount.email,
       });
     }
@@ -43,14 +43,14 @@ export async function register(request: Request, response: Response) {
 
     response.status(201).json({
       success: true,
-      message: 'Account created successfully',
+      message: "Account created successfully",
       data: { email: savedAccount.email },
     });
   } catch (error) {
     // console.error('Error during registration:', error);
     response.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: "Internal server error",
     });
   }
 }
@@ -61,7 +61,7 @@ export async function login(request: Request, response: Response) {
     if (!validationErrors.isEmpty())
       return response.status(400).json({
         success: false,
-        message: 'Invalid data, see response.data.errors for more information',
+        message: "Invalid data, see response.data.errors for more information",
         errors: validationErrors.array(),
       });
 
@@ -69,7 +69,7 @@ export async function login(request: Request, response: Response) {
     if (!foundAccount)
       return response
         .status(401)
-        .json({ success: false, message: 'Bad credentials' });
+        .json({ success: false, message: "Bad credentials" });
 
     const isPasswordOk = await bcrypt.compare(
       request.body.password,
@@ -78,12 +78,12 @@ export async function login(request: Request, response: Response) {
     if (!isPasswordOk)
       return response
         .status(401)
-        .json({ success: false, message: 'Bad credentials' });
+        .json({ success: false, message: "Bad credentials" });
 
     const token = generateToken(foundAccount._id);
     response
       .status(200)
-      .json({ success: true, message: 'Login success', token });
+      .json({ success: true, message: "Login success", token });
   } catch (error) {
     console.log(error);
     response.status(500);
@@ -96,10 +96,10 @@ export async function getUser(
 ) {
   try {
     const foundAccount = await Account.findOne({ _id: request.user }).select(
-      '-password'
+      "-password"
     );
 
-    response.status(200).json({ message: 'Account found', user: foundAccount });
+    response.status(200).json({ message: "Account found", user: foundAccount });
   } catch (error) {
     console.log(error);
     response.status(500);

@@ -1,12 +1,13 @@
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import mongoose from 'mongoose';
+import express, { Request, Response } from "express";
+import cors from "cors";
+import mongoose from "mongoose";
 
-import accountRoutes from './routes/account';
+import accountRoutes from "./routes/account";
+import emailRoutes from "./routes/email";
 
 const app = express();
 
-require('dotenv').config();
+require("dotenv").config();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -20,10 +21,11 @@ try {
 }
 
 const db = mongoose.connection;
-db.on('error', (error: Error) => console.log(error));
-db.once('error', (error: Error) => console.log(error));
+db.on("error", (error: Error) => console.log(error));
+db.once("error", (error: Error) => console.log(error));
 
-app.use('/api/account', accountRoutes);
+app.use("/api/account", accountRoutes);
+app.use("/api/email", emailRoutes);
 
 // app.get('/', (req: Request, res: Response) => {
 //   res.send('Hello, Express with TypeScript!');
