@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MdAllInbox, MdDrafts } from "react-icons/md";
 import { FaStar, FaTrash } from "react-icons/fa";
 import { IoMdSend } from "react-icons/io";
 import { FaChevronRight, FaChevronDown } from "react-icons/fa";
 import { Button } from "@components";
 import { SidebarItem } from "./SidebarItem";
+import { useEmail } from "@contexts"; // Import the useEmail hook
 
 const sidebarItems = [
   { icon: <MdAllInbox />, label: "inbox" },
@@ -14,23 +16,16 @@ const sidebarItems = [
   { icon: <FaTrash />, label: "trash" },
 ];
 
-type SidebarProps = {
-  selectedItem: string;
-  onItemClick: (label: string) => void;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-};
-
-export function Sidebar({
-  selectedItem,
-  onItemClick,
-  setIsOpen,
-}: SidebarProps) {
+export function Sidebar() {
+  const navigate = useNavigate();
   const [showMore, setShowMore] = useState(false);
+  const { selectedItem, setIsOpen, handleSidebarItemClick } = useEmail();
 
   const toggleShowMore = () => setShowMore(!showMore);
 
   const handleItemClick = (label: string) => {
-    onItemClick(label);
+    handleSidebarItemClick(label);
+    navigate(`/email/${label}`);
   };
 
   return (
@@ -51,7 +46,7 @@ export function Sidebar({
               item={item}
               index={index}
               selectedItem={selectedItem}
-              handleItemClick={handleItemClick}
+              handleItemClick={handleItemClick} // Pass directly to SidebarItem
             />
           ))}
         <div
@@ -69,7 +64,7 @@ export function Sidebar({
             item={sidebarItems[sidebarItems.length - 1]}
             index={sidebarItems.length - 1}
             selectedItem={selectedItem}
-            handleItemClick={handleItemClick}
+            handleItemClick={handleItemClick} // Pass directly to SidebarItem
           />
         )}
       </div>

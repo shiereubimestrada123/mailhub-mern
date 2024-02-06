@@ -1,6 +1,4 @@
-// import { IoIosMenu } from "react-icons/io";
 import { MdEmail } from "react-icons/md";
-// import { MdContactSupport } from "react-icons/md";
 import { IoIosSettings } from "react-icons/io";
 
 export function Header() {
@@ -18,7 +16,7 @@ export function Header() {
           <input
             type="text"
             placeholder="Find messages"
-            className="input input-bordered"
+            className="input input-bordered w-full max-w-xs"
           />
 
           <div className="flex items-center text-4xl gap-4">

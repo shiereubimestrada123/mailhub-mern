@@ -2,8 +2,7 @@ export function Inbox() {
   return (
     <section className="w-full">
       <div className="overflow-x-auto">
-        <table className="table">
-          {/* head */}
+        {/* <table className="table">
           <thead>
             <tr>
               <th>
@@ -18,7 +17,6 @@ export function Inbox() {
             </tr>
           </thead>
           <tbody>
-            {/* row 1 */}
             <tr>
               <th>
                 <label>
@@ -53,7 +51,7 @@ export function Inbox() {
                 <button className="btn btn-ghost btn-xs">details</button>
               </th>
             </tr>
-            {/* row 2 */}
+
             <tr>
               <th>
                 <label>
@@ -88,7 +86,7 @@ export function Inbox() {
                 <button className="btn btn-ghost btn-xs">details</button>
               </th>
             </tr>
-            {/* row 3 */}
+
             <tr>
               <th>
                 <label>
@@ -123,7 +121,7 @@ export function Inbox() {
                 <button className="btn btn-ghost btn-xs">details</button>
               </th>
             </tr>
-            {/* row 4 */}
+
             <tr>
               <th>
                 <label>
@@ -159,7 +157,7 @@ export function Inbox() {
               </th>
             </tr>
           </tbody>
-        </table>
+        </table> */}
       </div>
     </section>
   );

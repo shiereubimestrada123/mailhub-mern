@@ -1,14 +1,11 @@
 import { useParams } from "react-router-dom";
 import { FormInput, Modal, Button } from "@components";
 import { Drafts, Inbox, Send, Starred, Trash } from "./Category";
+import { useEmail } from "@contexts";
 
-type EmailViewProps = {
-  isOpen?: boolean;
-  setIsOpen?: React.Dispatch<React.SetStateAction<boolean>> | undefined;
-};
-
-export function EmailView({ isOpen, setIsOpen }: EmailViewProps) {
+export function EmailView() {
   const { category = "inbox" } = useParams();
+  const { isOpen } = useEmail();
 
   const componentsByCategory: { [key: string]: JSX.Element } = {
     inbox: <Inbox />,
@@ -25,8 +22,8 @@ export function EmailView({ isOpen, setIsOpen }: EmailViewProps) {
   return (
     <section className="w-5/6 p-2">
       <div>{categories}</div>
-      {isOpen && setIsOpen && (
-        <Modal setIsOpen={setIsOpen}>
+      {isOpen && (
+        <Modal>
           <div className="flex flex-col h-[420px]">
             <FormInput
               id="from"
