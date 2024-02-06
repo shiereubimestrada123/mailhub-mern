@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdAllInbox, MdDrafts } from "react-icons/md";
-import { FaStar, FaTrash } from "react-icons/fa";
-import { IoMdSend } from "react-icons/io";
-import { FaChevronRight, FaChevronDown } from "react-icons/fa";
+import { FaStar, FaTrash, FaChevronRight, FaChevronDown } from "react-icons/fa";
+import { IoMdSend, IoMdCreate } from "react-icons/io";
 import { Button } from "@components";
 import { SidebarItem } from "./SidebarItem";
-import { useEmail } from "@contexts"; // Import the useEmail hook
+import { useEmail } from "@contexts";
 
 const sidebarItems = [
   { icon: <MdAllInbox />, label: "inbox" },
@@ -35,7 +34,10 @@ export function Sidebar() {
         className="mb-3 text-slate-100 btn btn-block btn-active btn-primary"
         onClick={() => setIsOpen(true)}
       >
-        Compose
+        <span className="md:block sm:block hidden">Compose</span>
+        <span className="md:hidden sm:hidden block">
+          <IoMdCreate />
+        </span>
       </Button>
       <div>
         {sidebarItems
@@ -46,7 +48,7 @@ export function Sidebar() {
               item={item}
               index={index}
               selectedItem={selectedItem}
-              handleItemClick={handleItemClick} // Pass directly to SidebarItem
+              handleItemClick={handleItemClick}
             />
           ))}
         <div
@@ -55,7 +57,7 @@ export function Sidebar() {
         >
           <div className="flex items-center gap-2">
             {showMore ? <FaChevronDown /> : <FaChevronRight />}
-            <p>More</p>
+            <p className="md:block sm:block hidden">More</p>
           </div>
         </div>
         {showMore && (
@@ -64,7 +66,7 @@ export function Sidebar() {
             item={sidebarItems[sidebarItems.length - 1]}
             index={sidebarItems.length - 1}
             selectedItem={selectedItem}
-            handleItemClick={handleItemClick} // Pass directly to SidebarItem
+            handleItemClick={handleItemClick}
           />
         )}
       </div>

@@ -2,7 +2,7 @@ export function Inbox() {
   return (
     <section className="w-full">
       <div className="overflow-x-auto">
-        {/* <table className="table">
+        <table className="table">
           <thead>
             <tr>
               <th>
@@ -157,7 +157,7 @@ export function Inbox() {
               </th>
             </tr>
           </tbody>
-        </table> */}
+        </table>
       </div>
     </section>
   );

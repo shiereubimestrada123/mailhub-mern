@@ -15,9 +15,6 @@ export const SidebarItem = ({
 }: SidebarItemProps) => (
   <div
     key={index}
-    // className={`flex justify-between items-center w-full h-10 p-2 cursor-pointer rounded ${
-    //   selectedItem === item.label ? "bg-primary" : "hover:bg-info"
-    // }`}
     className={cn(
       "flex justify-between items-center w-full h-10 p-2 cursor-pointer rounded",
       selectedItem === item.label ? "bg-primary" : "hover:bg-info"
@@ -26,8 +23,10 @@ export const SidebarItem = ({
   >
     <div className="flex items-center gap-2">
       {item.icon}
-      <p>{item.label.charAt(0).toUpperCase() + item.label.slice(1)}</p>
+      <p className="md:block sm:block hidden">
+        {item.label.charAt(0).toUpperCase() + item.label.slice(1)}
+      </p>
     </div>
-    {index === 0 && <p>10</p>}
+    {index === 0 && <p className="md:block sm:block hidden">10</p>}
   </div>
 );
