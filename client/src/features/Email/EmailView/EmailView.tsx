@@ -24,7 +24,7 @@ export function EmailView() {
       <div>{categories}</div>
       {isOpen && (
         <Modal>
-          <div className="flex flex-col h-[420px]">
+          <div className="flex h-[420px] flex-col">
             <FormInput
               id="from"
               type="text"
@@ -46,11 +46,11 @@ export function EmailView() {
               classLabel="flex border-b"
               classInput="w-full outline-none p-2"
             />
-            <textarea className="grow outline-none my-2 resize-none border-b"></textarea>
+            <textarea className="my-2 grow resize-none border-b outline-none"></textarea>
             <div className="inline-flex">
               <Button
                 type="submit"
-                className="mt-3 text-slate-100 btn btn-active btn-primary"
+                className="btn btn-primary btn-active mt-3 text-slate-100"
                 // disabled={isSubmitting || isPending}
               >
                 Send

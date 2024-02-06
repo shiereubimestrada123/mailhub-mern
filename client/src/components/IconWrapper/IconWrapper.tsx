@@ -1,5 +1,5 @@
-import { ReactNode, CSSProperties } from 'react';
-import { IconContext } from 'react-icons';
+import { ReactNode, CSSProperties } from "react";
+import { IconContext } from "react-icons";
 
 type IconProps = {
   children: ReactNode;

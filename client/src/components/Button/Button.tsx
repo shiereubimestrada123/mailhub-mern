@@ -1,6 +1,6 @@
 type ButtonProps = {
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
-  type?: 'button' | 'submit' | 'reset';
+  type?: "button" | "submit" | "reset";
   className?: string;
   children?: React.ReactNode;
   disabled?: boolean;
@@ -8,7 +8,7 @@ type ButtonProps = {
 
 export function Button({
   onClick,
-  type = 'button',
+  type = "button",
   children,
   className,
   disabled,

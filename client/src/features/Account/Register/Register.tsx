@@ -190,7 +190,7 @@ export function Register() {
         />
         <Button
           type="submit"
-          className="my-3 text-slate-100 btn btn-block btn-active btn-primary"
+          className="btn btn-primary btn-active btn-block my-3 text-slate-100"
           disabled={isSubmitting || isPending}
         >
           Register

@@ -28,14 +28,14 @@ export function Sidebar() {
   };
 
   return (
-    <section className="bg-slate-300 p-4 h-custom-height w-1/6">
+    <section className="h-custom-height w-1/6 bg-slate-300 p-4">
       <Button
         type="submit"
-        className="mb-3 text-slate-100 btn btn-block btn-active btn-primary"
+        className="btn btn-primary btn-active btn-block mb-3 text-slate-100"
         onClick={() => setIsOpen(true)}
       >
-        <span className="md:block sm:block hidden">Compose</span>
-        <span className="md:hidden sm:hidden block">
+        <span className="hidden sm:block md:block">Compose</span>
+        <span className="block sm:hidden md:hidden">
           <IoMdCreate />
         </span>
       </Button>
@@ -52,12 +52,12 @@ export function Sidebar() {
             />
           ))}
         <div
-          className="flex justify-between items-center w-full h-10 p-2 rounded cursor-pointer hover:bg-info"
+          className="flex h-10 w-full cursor-pointer items-center justify-between rounded p-2 hover:bg-info"
           onClick={toggleShowMore}
         >
           <div className="flex items-center gap-2">
             {showMore ? <FaChevronDown /> : <FaChevronRight />}
-            <p className="md:block sm:block hidden">More</p>
+            <p className="hidden sm:block md:block">More</p>
           </div>
         </div>
         {showMore && (

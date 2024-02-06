@@ -5,7 +5,7 @@ type ErrorMsgProps = {
 
 export function ErrorMsg({ id, message }: ErrorMsgProps) {
   return message ? (
-    <p id={id} className='mt-1 text-red-500'>
+    <p id={id} className="mt-1 text-red-500">
       {message}
     </p>
   ) : null;

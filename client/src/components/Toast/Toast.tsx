@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 type ToastType = {
   onClose?: () => void;
@@ -20,7 +20,7 @@ export function Toast({ onClose, alertType, message, position }: ToastType) {
     return () => clearTimeout(timeoutId);
   }, [onClose]);
 
-  const alertPrefix = alertType ? 'alert-success' : 'alert-info';
+  const alertPrefix = alertType ? "alert-success" : "alert-info";
 
   return visible ? (
     <div className={`toast ${position}`}>
