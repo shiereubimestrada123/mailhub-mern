@@ -1,11 +1,85 @@
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
 import { FormInput, Modal, Button } from "@components";
-import { Drafts, Inbox, Send, Starred, Trash } from "./Category";
 import { useEmail } from "@contexts";
+import { useAuthStore, useEmailStore } from "@store";
+import { post, get } from "@utils";
+import { Drafts, Inbox, Send, Starred, Trash } from "./Category";
+
+type ComposeProps = {
+  from: "";
+  to: "";
+  subject: "";
+  message: "";
+};
 
 export function EmailView() {
   const { category = "inbox" } = useParams();
-  const { isOpen } = useEmail();
+  const { isOpen, setIsOpen } = useEmail();
+  const token = useAuthStore((state) => state.token);
+  const email = useAuthStore((state) => state.userAccount.user?.email);
+  const setMailbox = useEmailStore((state) => state.setMailbox);
+  const mailbox = useEmailStore((state) => state.mailbox);
+  const getMailBox = useEmailStore((state) => state.getMailBox);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setValue,
+    reset,
+  } = useForm<ComposeProps>({
+    defaultValues: {
+      from: email,
+      to: "",
+      subject: "",
+      message: "",
+    },
+  });
+
+  useEffect(() => {
+    console.log("mailbox", mailbox);
+  }, [mailbox]);
+
+  useEffect(() => {
+    const fetchMailBox = async () => {
+      if (!token) return;
+
+      const responseData = await get("/email");
+      // console.log("responseData", responseData);
+      getMailBox(responseData);
+    };
+
+    fetchMailBox();
+  }, []);
+
+  useEffect(() => {
+    if (email) {
+      setValue("from", email);
+    }
+  }, [email]);
+
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: async (newTodo) => {
+      return await post("/email/send", newTodo);
+    },
+  });
+
+  const onSubmit: SubmitHandler<ComposeProps> = async (data) => {
+    try {
+      const response = await mutateAsync(data as any);
+      console.log(response);
+      setMailbox({ inbox: response.received, outbox: response.sent });
+    } catch (error: unknown) {
+      console.log(error);
+      // if (axios.isAxiosError(error)) setToast(error?.response?.data);
+    } finally {
+      reset();
+      setIsOpen(false);
+    }
+  };
 
   const componentsByCategory: { [key: string]: JSX.Element } = {
     inbox: <Inbox />,
@@ -24,39 +98,87 @@ export function EmailView() {
       <div>{categories}</div>
       {isOpen && (
         <Modal>
-          <div className="flex h-[420px] flex-col">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex h-[420px] flex-col"
+          >
             <FormInput
               id="from"
               type="text"
               labelText="From: "
               classLabel="w-full flex border-b"
               classInput="w-full outline-none p-2"
+              register={register("from", {
+                required: {
+                  value: true,
+                  message: "Sender email is required",
+                },
+                pattern:
+                  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+              })}
+              errorRequired={
+                errors.from?.type === "required" && errors.from?.message
+              }
+              errorPattern={errors.from?.type === "pattern" && "Invalid email"}
             />
             <FormInput
               id="to"
               type="text"
               labelText="To: "
-              classLabel="flex border-b"
+              classLabel="w-full flex border-b"
               classInput="w-full outline-none p-2"
+              register={register("to", {
+                required: {
+                  value: true,
+                  message: "Recipient email is required",
+                },
+                pattern:
+                  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+              })}
+              errorRequired={
+                errors.to?.type === "required" && errors.to?.message
+              }
+              errorPattern={errors.to?.type === "pattern" && "Invalid email"}
             />
             <FormInput
-              id="to"
+              id="subject"
               type="text"
               labelText="Subject: "
-              classLabel="flex border-b"
+              classLabel="w-full flex border-b"
               classInput="w-full outline-none p-2"
+              register={register("subject", {
+                required: {
+                  value: true,
+                  message: "Subject is required",
+                },
+              })}
+              errorRequired={
+                errors.subject?.type === "required" && errors.subject?.message
+              }
             />
-            <textarea className="my-2 grow resize-none border-b outline-none"></textarea>
+            <textarea
+              id="message"
+              className="my-2 grow resize-none border-b outline-none"
+              {...register("message", {
+                required: {
+                  value: true,
+                  message: "Message is required",
+                },
+              })}
+            />
+            <span className="text-red-500">
+              {errors.message?.type === "required" && errors.message?.message}
+            </span>
             <div className="inline-flex">
               <Button
                 type="submit"
                 className="btn btn-primary btn-active mt-3 text-slate-100"
-                // disabled={isSubmitting || isPending}
+                disabled={isSubmitting || isPending}
               >
                 Send
               </Button>
             </div>
-          </div>
+          </form>
         </Modal>
       )}
     </section>

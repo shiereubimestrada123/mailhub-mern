@@ -1,7 +1,7 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
 
 axios.defaults.timeout = 100000;
-axios.defaults.baseURL = "http://localhost:5000/api/account";
+axios.defaults.baseURL = "http://localhost:5000/api";
 
 axios.interceptors.request.use(
   (config) => {
@@ -13,7 +13,7 @@ axios.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 axios.interceptors.response.use(
@@ -24,7 +24,7 @@ axios.interceptors.response.use(
     // if (error.response.status === 401) {
     // }
     return Promise.reject(error);
-  }
+  },
 );
 
 interface ApiResponse {
@@ -35,7 +35,7 @@ const handleRequest = async (
   method: string,
   url: string,
   data?: any,
-  headers?: any
+  headers?: any,
 ): Promise<any> => {
   try {
     const response: AxiosResponse<ApiResponse> = await axios({

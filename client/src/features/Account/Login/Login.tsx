@@ -30,7 +30,7 @@ export function Login() {
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (newTodo) => {
-      return await post("/login", newTodo);
+      return await post("/account/login", newTodo);
     },
   });
 

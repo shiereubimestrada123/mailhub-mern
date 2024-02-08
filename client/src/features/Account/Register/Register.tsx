@@ -41,7 +41,7 @@ export function Register() {
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (newTodo) => {
-      return await post("/register", newTodo);
+      return await post("/account/register", newTodo);
     },
   });
 

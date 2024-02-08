@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 type ToastData = {
   success: boolean;
@@ -15,20 +15,25 @@ type AccountState = {
 
   token: string;
   setToken: (value: string) => void;
+
+  userAccount: object;
+  getUserAccount: (value: object) => void;
 };
 
 export const useAuthStore = create<AccountState>((set) => ({
   isLogin: true,
   toast: {
     success: false,
-    message: '',
+    message: "",
   },
-  token: localStorage.getItem('token') ?? '',
+  token: localStorage.getItem("token") ?? "",
+  userAccount: {},
 
   setIsLogin: (value) => set({ isLogin: value }),
   setToast: (value) => set({ toast: value }),
   setToken: (value) => {
-    localStorage.setItem('token', value);
+    localStorage.setItem("token", value);
     set({ token: value });
   },
+  getUserAccount: (value) => set({ userAccount: value }),
 }));

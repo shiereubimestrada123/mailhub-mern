@@ -47,7 +47,6 @@ export async function register(request: Request, response: Response) {
       data: { email: savedAccount.email },
     });
   } catch (error) {
-    // console.error('Error during registration:', error);
     response.status(500).json({
       success: false,
       message: "Internal server error",
@@ -96,7 +95,7 @@ export async function getUser(
 ) {
   try {
     const foundAccount = await Account.findOne({ _id: request.user }).select(
-      "-password"
+      "-password -mailbox"
     );
 
     response.status(200).json({ message: "Account found", user: foundAccount });
