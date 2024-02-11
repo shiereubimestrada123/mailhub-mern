@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import produce from "immer";
 
 type Mailbox<T> = {
   inbox: T[];
@@ -8,9 +9,13 @@ type Mailbox<T> = {
 };
 type EmailState = {
   mailbox: Mailbox<any>;
-
   setMailbox: (mailbox: any) => void;
   getMailBox: (mailbox: any) => void;
+
+  selectedItem: string;
+  isOpen: boolean;
+  setSelectedItem: (label: string) => void;
+  setIsOpen: (isOpen: boolean) => void;
 };
 
 export const useEmailStore = create<EmailState>((set) => ({
@@ -20,6 +25,8 @@ export const useEmailStore = create<EmailState>((set) => ({
     drafts: [],
     trash: [],
   },
+  selectedItem: "inbox",
+  isOpen: false,
 
   setMailbox: (newMailbox) =>
     set((state) => {
@@ -40,4 +47,8 @@ export const useEmailStore = create<EmailState>((set) => ({
 
       return { mailbox: updatedMailbox };
     }),
+
+  setSelectedItem: (label: string) => set({ selectedItem: label }),
+
+  setIsOpen: (isOpen: boolean) => set({ isOpen }),
 }));

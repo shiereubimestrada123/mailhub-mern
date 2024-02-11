@@ -5,25 +5,27 @@ import { FaStar, FaTrash, FaChevronRight, FaChevronDown } from "react-icons/fa";
 import { IoMdSend, IoMdCreate } from "react-icons/io";
 import { Button } from "@components";
 import { SidebarItem } from "./SidebarItem";
-import { useEmail } from "@contexts";
+import { useEmailStore } from "@store";
 
 const sidebarItems = [
   { icon: <MdAllInbox />, label: "inbox" },
   { icon: <FaStar />, label: "starred" },
   { icon: <MdDrafts />, label: "drafts" },
-  { icon: <IoMdSend />, label: "send" },
+  { icon: <IoMdSend />, label: "sent" },
   { icon: <FaTrash />, label: "trash" },
 ];
 
 export function Sidebar() {
   const navigate = useNavigate();
   const [showMore, setShowMore] = useState(false);
-  const { selectedItem, setIsOpen, handleSidebarItemClick } = useEmail();
+  const selectedItem = useEmailStore((state) => state.selectedItem);
+  const setSelectedItem = useEmailStore((state) => state.setSelectedItem);
+  const setIsOpen = useEmailStore((state) => state.setIsOpen);
 
   const toggleShowMore = () => setShowMore(!showMore);
 
   const handleItemClick = (label: string) => {
-    handleSidebarItemClick(label);
+    setSelectedItem(label);
     navigate(`/email/${label}`);
   };
 
@@ -32,7 +34,10 @@ export function Sidebar() {
       <Button
         type="submit"
         className="btn btn-primary btn-active btn-block mb-3 text-slate-100"
-        onClick={() => setIsOpen(true)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
       >
         <span className="hidden sm:block md:block">Compose</span>
         <span className="block sm:hidden md:hidden">

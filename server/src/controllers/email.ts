@@ -9,7 +9,6 @@ export async function getAllEmails(
   response: Response
 ) {
   try {
-    // Find the current user's account and populate inbox and outbox emails
     const currentUserAccount = await Account.findOne({ _id: request.user })
       .populate({
         path: "mailbox.inbox",
@@ -22,7 +21,6 @@ export async function getAllEmails(
       })
       .populate("mailbox.trash");
 
-    // Check if currentUserAccount exists and has a mailbox property
     if (!currentUserAccount || !currentUserAccount.mailbox) {
       return response.status(404).json({ message: "Account not found" });
     }
@@ -36,7 +34,6 @@ export async function getAllEmails(
       trash,
     };
 
-    // Send the fetched emails to the frontend
     response.status(200).json({ message: "Emails found", emails });
   } catch (error) {
     console.log(error);
@@ -99,7 +96,6 @@ export async function sendEmail(
     senderAccount.mailbox.outbox.push(savedEmailSend._id);
     receiverAccount.mailbox.inbox.push(savedEmailIn._id);
 
-    // Save changes to both sender and receiver accounts
     await Promise.all([senderAccount.save(), receiverAccount.save()]);
 
     response.status(201).json({
