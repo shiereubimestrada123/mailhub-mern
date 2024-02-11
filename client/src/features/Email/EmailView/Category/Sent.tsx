@@ -8,11 +8,11 @@ type Email = {
   subject: string;
 };
 
-type InboxProps = {
-  inbox: Email[];
+type SendProps = {
+  outbox: Email[];
 };
 
-export function Inbox({ inbox }: InboxProps) {
+export function Sent({ outbox }: SendProps) {
   const [starredEmails, setStarredEmails] = useState<string[]>([]);
 
   const toggleStar = (emailId: string) => {
@@ -40,7 +40,7 @@ export function Inbox({ inbox }: InboxProps) {
             </tr>
           </thead>
           <tbody>
-            {inbox.map((email) => (
+            {outbox.map((email) => (
               <tr key={email._id} className="cursor-pointer hover:bg-gray-200">
                 <td>
                   <label>

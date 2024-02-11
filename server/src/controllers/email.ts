@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { validationResult } from "express-validator";
 import Email from "../models/Email";
 import Account from "../models/Account";
@@ -9,26 +9,38 @@ export async function getAllEmails(
   response: Response
 ) {
   try {
-    const account = await Account.findOne({ _id: request.user })
-      .select("mailbox")
-      .populate("mailbox.inbox mailbox.outbox mailbox.drafts mailbox.trash");
-    if (account) {
-      const mailbox = account.mailbox;
-      const emails = {
-        inbox: mailbox?.inbox,
-        outbox: mailbox?.outbox,
-        drafts: mailbox?.drafts,
-        trash: mailbox?.trash,
-      };
-      response.status(200).json({ message: "Emails found", emails });
-    } else {
-      response.status(404).json({ message: "Account not found" });
+    const currentUserAccount = await Account.findOne({ _id: request.user })
+      .populate({
+        path: "mailbox.inbox",
+        options: { sort: { createdAt: -1 } },
+      })
+      .populate("mailbox.drafts")
+      .populate({
+        path: "mailbox.outbox",
+        options: { sort: { createdAt: -1 } },
+      })
+      .populate("mailbox.trash");
+
+    if (!currentUserAccount || !currentUserAccount.mailbox) {
+      return response.status(404).json({ message: "Account not found" });
     }
+
+    const { inbox, drafts, outbox, trash } = currentUserAccount.mailbox;
+
+    const emails = {
+      inbox,
+      drafts,
+      outbox,
+      trash,
+    };
+
+    response.status(200).json({ message: "Emails found", emails });
   } catch (error) {
     console.log(error);
-    response.status(500);
+    response.status(500).json({ message: "Internal server error" });
   }
 }
+
 export async function sendEmail(
   request: AuthenticatedRequest,
   response: Response
@@ -41,35 +53,58 @@ export async function sendEmail(
         errors: validationErrors.array(),
       });
 
+    const senderAccount = await Account.findOne({ _id: request.user });
+    if (!senderAccount) {
+      return response.status(404).json({ message: "Sender account not found" });
+    }
+
+    if (!senderAccount.mailbox) {
+      return response
+        .status(404)
+        .json({ message: "Mailbox not found for sender account" });
+    }
+
     const newEmailSend = new Email({
-      from: request.body.from,
+      from: senderAccount.email,
       to: request.body.to,
       subject: request.body.subject,
       message: request.body.message,
     });
     const savedEmailSend = await newEmailSend.save();
 
+    const receiverAccount = await Account.findOne({ email: request.body.to });
+    if (!receiverAccount) {
+      return response
+        .status(404)
+        .json({ message: "Receiver account not found" });
+    }
+
+    if (!receiverAccount.mailbox) {
+      return response
+        .status(404)
+        .json({ message: "Mailbox not found for receiver account" });
+    }
+
     const newEmailReceive = new Email({
-      from: request.body.to,
-      to: request.body.from,
-      subject: "Re: " + request.body.subject,
+      from: senderAccount.email,
+      to: receiverAccount.email,
+      subject: request.body.subject,
       message: request.body.message,
     });
     const savedEmailIn = await newEmailReceive.save();
 
+    senderAccount.mailbox.outbox.push(savedEmailSend._id);
+    receiverAccount.mailbox.inbox.push(savedEmailIn._id);
+
+    await Promise.all([senderAccount.save(), receiverAccount.save()]);
+
     response.status(201).json({
       message: "Email sent, reply received",
       sent: newEmailSend,
-      received: savedEmailIn,
+      received: newEmailReceive,
     });
-
-    const foundAccount = await Account.findOne({ _id: request.user });
-    if (foundAccount?.mailbox) {
-      foundAccount.mailbox.outbox.push(savedEmailSend._id);
-      foundAccount.mailbox.inbox.push(savedEmailIn._id);
-      await foundAccount.save();
-    }
   } catch (error) {
     console.log(error);
+    response.status(500).json({ message: "Internal server error" });
   }
 }

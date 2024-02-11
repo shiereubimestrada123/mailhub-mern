@@ -3,10 +3,9 @@ import { useParams } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { FormInput, Modal, Button } from "@components";
-import { useEmail } from "@contexts";
 import { useAuthStore, useEmailStore } from "@store";
 import { post, get } from "@utils";
-import { Drafts, Inbox, Send, Starred, Trash } from "./Category";
+import { Drafts, Inbox, Sent, Starred, Trash } from "./Category";
 
 type ComposeProps = {
   from: "";
@@ -17,18 +16,20 @@ type ComposeProps = {
 
 export function EmailView() {
   const { category = "inbox" } = useParams();
-  const { isOpen, setIsOpen } = useEmail();
   const token = useAuthStore((state) => state.token);
+  const isOpen = useEmailStore((state) => state.isOpen);
+  const setIsOpen = useEmailStore((state) => state.setIsOpen);
   const email = useAuthStore((state) => state.userAccount.user?.email);
   const setMailbox = useEmailStore((state) => state.setMailbox);
   const mailbox = useEmailStore((state) => state.mailbox);
   const getMailBox = useEmailStore((state) => state.getMailBox);
 
+  let { inbox, outbox, drafts, trash } = mailbox;
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    setValue,
     reset,
   } = useForm<ComposeProps>({
     defaultValues: {
@@ -40,15 +41,14 @@ export function EmailView() {
   });
 
   useEffect(() => {
-    console.log("mailbox", mailbox);
-  }, [mailbox]);
+    getMailBox(mailbox);
+  }, []);
 
   useEffect(() => {
     const fetchMailBox = async () => {
       if (!token) return;
 
       const responseData = await get("/email");
-      // console.log("responseData", responseData);
       getMailBox(responseData);
     };
 
@@ -56,14 +56,17 @@ export function EmailView() {
   }, []);
 
   useEffect(() => {
-    if (email) {
-      setValue("from", email);
-    }
-  }, [email]);
+    reset({
+      from: email,
+      to: "",
+      subject: "",
+      message: "",
+    });
+  }, [email, reset]);
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (newTodo) => {
-      return await post("/email/send", newTodo);
+      return await post("/email/sent", newTodo);
     },
   });
 
@@ -82,10 +85,10 @@ export function EmailView() {
   };
 
   const componentsByCategory: { [key: string]: JSX.Element } = {
-    inbox: <Inbox />,
+    inbox: <Inbox inbox={inbox} />,
     starred: <Starred />,
     drafts: <Drafts />,
-    send: <Send />,
+    sent: <Sent outbox={outbox} />,
     trash: <Trash />,
   };
 

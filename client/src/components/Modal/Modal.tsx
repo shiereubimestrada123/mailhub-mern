@@ -1,8 +1,8 @@
 import { IoIosClose } from "react-icons/io";
-import { useEmail } from "@contexts";
+import { useEmailStore } from "@store";
 
 export function Modal({ children }: { children: React.ReactNode }) {
-  const { setIsOpen } = useEmail();
+  const setIsOpen = useEmailStore((state) => state.setIsOpen);
 
   return (
     <div className="fixed bottom-0 right-0 mb-[-16px] mr-[-16px] flex flex-col items-end sm:mb-[-16px] sm:mr-[-16px] md:mb-[-16px] md:mr-[-16px]">
