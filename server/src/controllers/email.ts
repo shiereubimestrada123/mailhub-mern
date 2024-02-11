@@ -11,19 +11,33 @@ export async function getAllEmails(
   try {
     // Find the current user's account and populate inbox and outbox emails
     const currentUserAccount = await Account.findOne({ _id: request.user })
-      .populate("mailbox.inbox")
-      .populate("mailbox.outbox");
+      .populate({
+        path: "mailbox.inbox",
+        options: { sort: { createdAt: -1 } },
+      })
+      .populate("mailbox.drafts")
+      .populate({
+        path: "mailbox.outbox",
+        options: { sort: { createdAt: -1 } },
+      })
+      .populate("mailbox.trash");
 
     // Check if currentUserAccount exists and has a mailbox property
     if (!currentUserAccount || !currentUserAccount.mailbox) {
       return response.status(404).json({ message: "Account not found" });
     }
 
-    const inbox = currentUserAccount.mailbox.inbox;
-    const outbox = currentUserAccount.mailbox.outbox;
+    const { inbox, drafts, outbox, trash } = currentUserAccount.mailbox;
+
+    const emails = {
+      inbox,
+      drafts,
+      outbox,
+      trash,
+    };
 
     // Send the fetched emails to the frontend
-    response.status(200).json({ message: "Emails found", inbox, outbox });
+    response.status(200).json({ message: "Emails found", emails });
   } catch (error) {
     console.log(error);
     response.status(500).json({ message: "Internal server error" });
@@ -77,7 +91,7 @@ export async function sendEmail(
     const newEmailReceive = new Email({
       from: senderAccount.email,
       to: receiverAccount.email,
-      subject: "Re: " + request.body.subject,
+      subject: request.body.subject,
       message: request.body.message,
     });
     const savedEmailIn = await newEmailReceive.save();

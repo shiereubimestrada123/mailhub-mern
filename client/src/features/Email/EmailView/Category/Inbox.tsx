@@ -1,4 +1,13 @@
-export function Inbox() {
+import { CiStar } from "react-icons/ci";
+import { FaStar } from "react-icons/fa";
+
+type InboxProps = {
+  inbox: Record<string, unknown>[];
+};
+
+export function Inbox({ inbox }: InboxProps) {
+  console.log(inbox);
+
   return (
     <section className="w-full">
       <div className="overflow-x-auto">
@@ -10,6 +19,7 @@ export function Inbox() {
                   <input type="checkbox" className="checkbox" />
                 </label>
               </th>
+              <th></th>
               <th>Name</th>
               <th>Job</th>
               <th>Favorite Color</th>
@@ -22,6 +32,10 @@ export function Inbox() {
                 <label>
                   <input type="checkbox" className="checkbox" />
                 </label>
+              </th>
+              <th>
+                <CiStar className="pb-1 text-3xl" />
+                {/* <FaStar className="pb-1 text-3xl" /> */}
               </th>
               <td>
                 <div className="flex items-center gap-3">
@@ -58,6 +72,10 @@ export function Inbox() {
                   <input type="checkbox" className="checkbox" />
                 </label>
               </th>
+              <th>
+                <CiStar className="pb-1 text-3xl" />
+                {/* <FaStar className="pb-1 text-3xl" /> */}
+              </th>
               <td>
                 <div className="flex items-center gap-3">
                   <div className="avatar">
@@ -93,6 +111,10 @@ export function Inbox() {
                   <input type="checkbox" className="checkbox" />
                 </label>
               </th>
+              <th>
+                <CiStar className="pb-1 text-3xl" />
+                {/* <FaStar className="pb-1 text-3xl" /> */}
+              </th>
               <td>
                 <div className="flex items-center gap-3">
                   <div className="avatar">
@@ -127,6 +149,10 @@ export function Inbox() {
                 <label>
                   <input type="checkbox" className="checkbox" />
                 </label>
+              </th>
+              <th>
+                <CiStar className="pb-1 text-3xl" />
+                {/* <FaStar className="pb-1 text-3xl" /> */}
               </th>
               <td>
                 <div className="flex items-center gap-3">

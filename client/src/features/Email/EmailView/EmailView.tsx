@@ -24,11 +24,13 @@ export function EmailView() {
   const mailbox = useEmailStore((state) => state.mailbox);
   const getMailBox = useEmailStore((state) => state.getMailBox);
 
+  let { inbox, sent, drafts, starred } = mailbox;
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    setValue,
+    // setValue,
     reset,
   } = useForm<ComposeProps>({
     defaultValues: {
@@ -40,26 +42,34 @@ export function EmailView() {
   });
 
   useEffect(() => {
-    console.log("mailbox", mailbox);
-  }, [mailbox]);
+    getMailBox(mailbox);
+  }, []);
 
   useEffect(() => {
     const fetchMailBox = async () => {
       if (!token) return;
 
       const responseData = await get("/email");
-      // console.log("responseData", responseData);
       getMailBox(responseData);
     };
 
     fetchMailBox();
   }, []);
 
+  // useEffect(() => {
+  //   if (email) {
+  //     setValue("from", email);
+  //   }
+  // }, [email]);
+
   useEffect(() => {
-    if (email) {
-      setValue("from", email);
-    }
-  }, [email]);
+    reset({
+      from: email,
+      to: "",
+      subject: "",
+      message: "",
+    });
+  }, [email, reset]);
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (newTodo) => {
@@ -82,7 +92,7 @@ export function EmailView() {
   };
 
   const componentsByCategory: { [key: string]: JSX.Element } = {
-    inbox: <Inbox />,
+    inbox: <Inbox inbox={inbox} />,
     starred: <Starred />,
     drafts: <Drafts />,
     send: <Send />,
