@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
@@ -24,8 +24,10 @@ export function EmailView() {
   const mailbox = useEmailStore((state) => state.mailbox);
   const getMailBox = useEmailStore((state) => state.getMailBox);
 
-  let { inbox, outbox, drafts, trash } = mailbox;
+  const [currentPage, setCurrentPage] = useState(1);
 
+  let { inbox, outbox, drafts, trash } = mailbox;
+  console.log("api for inbox", inbox);
   const {
     register,
     handleSubmit,
@@ -44,16 +46,29 @@ export function EmailView() {
     getMailBox(mailbox);
   }, []);
 
+  // useEffect(() => {
+  //   const fetchMailBox = async () => {
+  //     if (!token) return;
+
+  //     const responseData = await get("/email");
+  //     getMailBox(responseData);
+  //   };
+
+  //   fetchMailBox();
+  // }, []);
+
   useEffect(() => {
     const fetchMailBox = async () => {
-      if (!token) return;
-
-      const responseData = await get("/email");
-      getMailBox(responseData);
+      try {
+        const responseData = await get(`/email?page=${currentPage}`);
+        getMailBox(responseData); // Update Zustand state directly
+      } catch (error) {
+        console.error("Error fetching mailbox:", error);
+      }
     };
 
     fetchMailBox();
-  }, []);
+  }, [currentPage]);
 
   useEffect(() => {
     reset({
@@ -63,6 +78,16 @@ export function EmailView() {
       message: "",
     });
   }, [email, reset]);
+
+  const handlePageChange = (page: number) => {
+    console.log("EmailView - handlePageChange:", page);
+    setCurrentPage(page); // Update the current page count
+    // Call any other necessary functions or APIs related to page change here
+  };
+
+  useEffect(() => {
+    console.log("EmailView - currentPage:", currentPage);
+  }, [currentPage]);
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (newTodo) => {
@@ -85,7 +110,14 @@ export function EmailView() {
   };
 
   const componentsByCategory: { [key: string]: JSX.Element } = {
-    inbox: <Inbox inbox={inbox} />,
+    inbox: (
+      <Inbox
+        inbox={inbox}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+        emailsPerPage={10}
+      />
+    ),
     starred: <Starred />,
     drafts: <Drafts />,
     sent: <Sent outbox={outbox} />,

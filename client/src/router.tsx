@@ -13,10 +13,10 @@ export const router = createBrowserRouter(
     <Route path="/" element={<App />}>
       <Route path="/account" element={<AccountPage />} />
       <Route path="/email" element={<EmailPage />}>
-        <Route path=":category" element={<EmailView />} />
+        <Route path=":category/*" element={<EmailView />} />
       </Route>
-      <Route path="/not-found" element={<NotFoundPage />} />
-      <Route path="*" element={<Navigate to="/not-found" replace />} />
-    </Route>
-  )
+      {/* <Route path="/not-found" element={<NotFoundPage />} />
+      <Route path="*" element={<Navigate to="/not-found" replace />} /> */}
+    </Route>,
+  ),
 );

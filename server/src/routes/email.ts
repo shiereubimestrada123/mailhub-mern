@@ -6,6 +6,6 @@ import { emailValidations } from "../middleware/validation";
 const router = express.Router();
 
 router.get("/", authenticateToken, getAllEmails);
-router.post("/send", authenticateToken, [...emailValidations], sendEmail);
+router.post("/sent", authenticateToken, [...emailValidations], sendEmail);
 
 export default router;
