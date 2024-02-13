@@ -18,10 +18,8 @@ type InboxProps = {
   inbox: Inbox;
   currentPage: number;
   onPageChange: (page: number) => void;
-  emailsPerPage: number; // Include emailsPerPage as a prop
+  emailsPerPage: number;
 };
-
-const ITEMS_PER_PAGE = 10;
 
 export function Inbox({
   inbox,
@@ -30,20 +28,17 @@ export function Inbox({
   emailsPerPage,
 }: InboxProps) {
   if (!inbox || !inbox.items) {
-    return <div>Loading...</div>; // or display an error message
+    return <div>Loading...</div>;
   }
 
   const [starredEmails, setStarredEmails] = useState<string[]>([]);
 
   const totalPages = Math.ceil(inbox.totalCount / emailsPerPage);
-  console.log("totalPages", totalPages);
   const startIndex = (currentPage - 1) * emailsPerPage;
-  console.log("startIndex", startIndex);
   const endIndex = Math.min(startIndex + emailsPerPage, inbox.totalCount);
-  console.log("endIndex", endIndex);
 
   const visibleEmails = inbox.items.slice(0, endIndex);
-  console.log(visibleEmails);
+
   const toggleStar = (emailId: string) => {
     if (starredEmails.includes(emailId)) {
       setStarredEmails(starredEmails.filter((id) => id !== emailId));

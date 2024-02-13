@@ -34,45 +34,49 @@ export async function getAllEmails(
     const currentUserAccount = await Account.findOne({
       _id: currentUserAccountId,
     })
-      .populate({
-        path: "mailbox.inbox",
-        options: {
-          sort: { createdAt: -1 },
-          skip: (parsedPage - 1) * parsedPageSize,
-          limit: parsedPageSize,
-        },
-      })
       .populate("mailbox.drafts")
-      .populate({
-        path: "mailbox.outbox",
-        options: {
-          sort: { createdAt: -1 },
-          skip: (parsedPage - 1) * parsedPageSize,
-          limit: parsedPageSize,
-        },
-      })
+      .populate("mailbox.outbox")
       .populate("mailbox.trash");
 
     if (!currentUserAccount || !currentUserAccount.mailbox) {
       return response.status(404).json({ message: "Account not found" });
     }
 
-    const { inbox, drafts, outbox, trash } = currentUserAccount.mailbox;
+    const inboxCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.inbox },
+    });
 
-    // Count total number of items in each array for pagination
-    const [inboxCount, draftsCount, outboxCount, trashCount] =
-      await Promise.all([
-        Email.countDocuments({ _id: { $in: inbox } }),
-        Email.countDocuments({ _id: { $in: drafts } }),
-        Email.countDocuments({ _id: { $in: outbox } }),
-        Email.countDocuments({ _id: { $in: trash } }),
-      ]);
+    const inbox = await Email.find({
+      _id: { $in: currentUserAccount.mailbox.inbox },
+    })
+      .sort({ createdAt: -1 })
+      .skip((parsedPage - 1) * parsedPageSize)
+      .limit(parsedPageSize);
+
+    const draftsCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.drafts },
+    });
+    const outboxCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.outbox },
+    });
+    const trashCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.trash },
+    });
 
     const emails = {
       inbox: { items: inbox, totalCount: inboxCount },
-      drafts: { items: drafts, totalCount: draftsCount },
-      outbox: { items: outbox, totalCount: outboxCount },
-      trash: { items: trash, totalCount: trashCount },
+      drafts: {
+        items: currentUserAccount.mailbox.drafts,
+        totalCount: draftsCount,
+      },
+      outbox: {
+        items: currentUserAccount.mailbox.outbox,
+        totalCount: outboxCount,
+      },
+      trash: {
+        items: currentUserAccount.mailbox.trash,
+        totalCount: trashCount,
+      },
     };
 
     response.status(200).json({ message: "Emails found", emails });

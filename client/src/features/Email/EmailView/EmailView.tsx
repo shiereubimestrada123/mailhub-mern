@@ -27,7 +27,7 @@ export function EmailView() {
   const [currentPage, setCurrentPage] = useState(1);
 
   let { inbox, outbox, drafts, trash } = mailbox;
-  console.log("api for inbox", inbox);
+
   const {
     register,
     handleSubmit,
@@ -45,17 +45,6 @@ export function EmailView() {
   useEffect(() => {
     getMailBox(mailbox);
   }, []);
-
-  // useEffect(() => {
-  //   const fetchMailBox = async () => {
-  //     if (!token) return;
-
-  //     const responseData = await get("/email");
-  //     getMailBox(responseData);
-  //   };
-
-  //   fetchMailBox();
-  // }, []);
 
   useEffect(() => {
     const fetchMailBox = async () => {
@@ -80,9 +69,7 @@ export function EmailView() {
   }, [email, reset]);
 
   const handlePageChange = (page: number) => {
-    console.log("EmailView - handlePageChange:", page);
-    setCurrentPage(page); // Update the current page count
-    // Call any other necessary functions or APIs related to page change here
+    setCurrentPage(page);
   };
 
   useEffect(() => {
