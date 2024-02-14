@@ -14,7 +14,7 @@ export const SidebarItem = ({
   selectedItem,
   handleItemClick,
 }: SidebarItemProps) => {
-  const mailbox = useEmailStore((state) => state.mailbox);
+  const totalCount = useEmailStore((state) => state.mailbox.inbox.totalCount);
 
   return (
     <div
@@ -31,9 +31,11 @@ export const SidebarItem = ({
           {item.label.charAt(0).toUpperCase() + item.label.slice(1)}
         </p>
       </div>
-      {/* {index === 0 && (
-        <p className="hidden sm:block md:block">{mailbox.inbox.length}</p>
-      )} */}
+      {index === 0 && (
+        <p className="hidden sm:block md:block">
+          {totalCount ? totalCount : null}
+        </p>
+      )}
     </div>
   );
 };
