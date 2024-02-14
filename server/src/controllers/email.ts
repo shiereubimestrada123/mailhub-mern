@@ -4,39 +4,94 @@ import Email from "../models/Email";
 import Account from "../models/Account";
 import { AuthenticatedRequest } from "./../middleware/authToken";
 
+import { isValidObjectId } from "mongoose";
+
 export async function getAllEmails(
   request: AuthenticatedRequest,
   response: Response
 ) {
   try {
-    const currentUserAccount = await Account.findOne({ _id: request.user })
-      .populate({
-        path: "mailbox.inbox",
-        options: { sort: { createdAt: -1 } },
-      })
+    const { page = "1", pageSize = "25" } = request.query;
+    const parsedPage = parseInt(page as string, 10);
+    const parsedPageSize = parseInt(pageSize as string, 10);
+
+    if (
+      isNaN(parsedPage) ||
+      isNaN(parsedPageSize) ||
+      parsedPage < 1 ||
+      parsedPageSize < 1
+    ) {
+      return response
+        .status(400)
+        .json({ message: "Invalid page or pageSize parameters" });
+    }
+
+    const currentUserAccountId = request.user;
+    if (!isValidObjectId(currentUserAccountId)) {
+      return response.status(400).json({ message: "Invalid user ID" });
+    }
+
+    const currentUserAccount = await Account.findOne({
+      _id: currentUserAccountId,
+    })
       .populate("mailbox.drafts")
-      .populate({
-        path: "mailbox.outbox",
-        options: { sort: { createdAt: -1 } },
-      })
+      .populate("mailbox.outbox")
       .populate("mailbox.trash");
 
     if (!currentUserAccount || !currentUserAccount.mailbox) {
       return response.status(404).json({ message: "Account not found" });
     }
 
-    const { inbox, drafts, outbox, trash } = currentUserAccount.mailbox;
+    const inboxCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.inbox },
+    });
+
+    const outboxCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.outbox },
+    });
+
+    const inbox = await Email.find({
+      _id: { $in: currentUserAccount.mailbox.inbox },
+    })
+      .sort({ createdAt: -1 })
+      .skip((parsedPage - 1) * parsedPageSize)
+      .limit(parsedPageSize);
+
+    const draftsCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.drafts },
+    });
+
+    const outbox = await Email.find({
+      _id: { $in: currentUserAccount.mailbox.outbox },
+    })
+      .sort({ createdAt: -1 })
+      .skip((parsedPage - 1) * parsedPageSize)
+      .limit(parsedPageSize);
+
+    const trashCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.trash },
+    });
 
     const emails = {
-      inbox,
-      drafts,
-      outbox,
-      trash,
+      inbox: { items: inbox, totalCount: inboxCount },
+      drafts: {
+        items: currentUserAccount.mailbox.drafts,
+        totalCount: draftsCount,
+      },
+      outbox: {
+        items: outbox,
+        totalCount: outboxCount,
+      },
+      trash: {
+        items: currentUserAccount.mailbox.trash,
+        totalCount: trashCount,
+      },
+      pageSize: parsedPageSize,
     };
 
     response.status(200).json({ message: "Emails found", emails });
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching emails:", error);
     response.status(500).json({ message: "Internal server error" });
   }
 }

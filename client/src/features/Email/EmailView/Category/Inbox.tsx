@@ -1,27 +1,36 @@
 import { useState } from "react";
 import { CiStar } from "react-icons/ci";
 import { FaStar } from "react-icons/fa";
-
-type Email = {
-  _id: string;
-  to: string;
-  subject: string;
-};
+import { Pagination } from "@components";
+import { InboxCategory } from "@types";
 
 type InboxProps = {
-  inbox: Email[];
+  inbox: InboxCategory;
+  currentPage: number;
+  onPageChange: (page: number) => void;
+  pageSize: number;
 };
 
-export function Inbox({ inbox }: InboxProps) {
+export function Inbox({
+  inbox,
+  currentPage,
+  onPageChange,
+  pageSize,
+}: InboxProps) {
   const [starredEmails, setStarredEmails] = useState<string[]>([]);
 
-  const toggleStar = (emailId: string) => {
-    if (starredEmails.includes(emailId)) {
-      setStarredEmails(starredEmails.filter((id) => id !== emailId));
+  const toggleStar = (inboxId: string) => {
+    if (starredEmails.includes(inboxId)) {
+      setStarredEmails(starredEmails.filter((id) => id !== inboxId));
     } else {
-      setStarredEmails([...starredEmails, emailId]);
+      setStarredEmails([...starredEmails, inboxId]);
     }
   };
+
+  const totalPages = Math.ceil(inbox.totalCount / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, inbox.totalCount);
+  const inboxItems = inbox.items.slice(0, endIndex);
 
   return (
     <section className="w-full">
@@ -40,27 +49,38 @@ export function Inbox({ inbox }: InboxProps) {
             </tr>
           </thead>
           <tbody>
-            {inbox.map((email) => (
-              <tr key={email._id} className="cursor-pointer hover:bg-gray-200">
+            {inboxItems.map((item) => (
+              <tr key={item._id} className="cursor-pointer hover:bg-gray-200">
                 <td>
                   <label>
                     <input type="checkbox" className="checkbox" />
                   </label>
                 </td>
-                <td onClick={() => toggleStar(email._id)}>
-                  {!starredEmails.includes(email._id) ? (
-                    <CiStar className="pb-1 text-3xl" />
+                <td>
+                  {!starredEmails.includes(item._id) ? (
+                    <CiStar
+                      className="pb-1 text-3xl"
+                      onClick={() => toggleStar(item._id)}
+                    />
                   ) : (
-                    <FaStar className="pb-1 text-3xl" />
+                    <FaStar
+                      className="pb-1 text-3xl"
+                      onClick={() => toggleStar(item._id)}
+                    />
                   )}
                 </td>
-                <td>{email.to}</td>
-                <td>{email.subject}</td>
+                <td>{item.to}</td>
+                <td>{item.subject}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </section>
   );
 }

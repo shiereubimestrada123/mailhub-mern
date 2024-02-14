@@ -31,9 +31,9 @@ export const SidebarItem = ({
           {item.label.charAt(0).toUpperCase() + item.label.slice(1)}
         </p>
       </div>
-      {index === 0 && (
+      {/* {index === 0 && (
         <p className="hidden sm:block md:block">{mailbox.inbox.length}</p>
-      )}
+      )} */}
     </div>
   );
 };

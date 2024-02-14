@@ -30,7 +30,7 @@ export function Sidebar() {
   };
 
   return (
-    <section className="h-custom-height w-1/6 bg-slate-300 p-4">
+    <section className="h-screen w-1/6 bg-slate-300 p-4">
       <Button
         type="submit"
         className="btn btn-primary btn-active btn-block mb-3 text-slate-100"
