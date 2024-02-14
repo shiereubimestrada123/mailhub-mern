@@ -8,10 +8,10 @@ import { post, get } from "@utils";
 import { Drafts, Inbox, Sent, Starred, Trash } from "./Category";
 
 type ComposeProps = {
-  from: "";
-  to: "";
-  subject: "";
-  message: "";
+  from: string;
+  to: string;
+  subject: string;
+  message: string;
 };
 
 export function EmailView() {
@@ -72,10 +72,6 @@ export function EmailView() {
     setCurrentPage(page);
   };
 
-  // useEffect(() => {
-  //   console.log("EmailView - currentPage:", currentPage);
-  // }, [currentPage]);
-
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (newTodo) => {
       return await post("/email/sent", newTodo);
@@ -87,10 +83,10 @@ export function EmailView() {
       const response = await mutateAsync(data as any);
 
       setMailbox({
-        inbox: {
-          items: [...inbox.items, response.received],
-          totalCount: inbox.totalCount + 1,
-        },
+        // inbox: {
+        //   items: [...inbox.items, response.received],
+        //   totalCount: inbox.totalCount + 1,
+        // },
         outbox: {
           items: [...outbox.items, response.sent],
           totalCount: outbox.totalCount + 1,
@@ -103,6 +99,8 @@ export function EmailView() {
       // if (axios.isAxiosError(error)) setToast(error?.response?.data);
     } finally {
       reset();
+      const responseData = await get(`/email?page=${currentPage}`);
+      getMailBox(responseData);
       setIsOpen(false);
     }
   };
