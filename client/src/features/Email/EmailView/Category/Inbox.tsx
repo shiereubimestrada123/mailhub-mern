@@ -18,14 +18,14 @@ type InboxProps = {
   inbox: Inbox;
   currentPage: number;
   onPageChange: (page: number) => void;
-  emailsPerPage: number;
+  pageSize: number;
 };
 
 export function Inbox({
   inbox,
   currentPage,
   onPageChange,
-  emailsPerPage,
+  pageSize,
 }: InboxProps) {
   if (!inbox || !inbox.items) {
     return <div>Loading...</div>;
@@ -33,9 +33,9 @@ export function Inbox({
 
   const [starredEmails, setStarredEmails] = useState<string[]>([]);
 
-  const totalPages = Math.ceil(inbox.totalCount / emailsPerPage);
-  const startIndex = (currentPage - 1) * emailsPerPage;
-  const endIndex = Math.min(startIndex + emailsPerPage, inbox.totalCount);
+  const totalPages = Math.ceil(inbox.totalCount / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, inbox.totalCount);
 
   const visibleEmails = inbox.items.slice(0, endIndex);
 
@@ -71,11 +71,17 @@ export function Inbox({
                     <input type="checkbox" className="checkbox" />
                   </label>
                 </td>
-                <td onClick={() => toggleStar(email._id)}>
+                <td>
                   {!starredEmails.includes(email._id) ? (
-                    <CiStar className="pb-1 text-3xl" />
+                    <CiStar
+                      className="pb-1 text-3xl"
+                      onClick={() => toggleStar(email._id)}
+                    />
                   ) : (
-                    <FaStar className="pb-1 text-3xl" />
+                    <FaStar
+                      className="pb-1 text-3xl"
+                      onClick={() => toggleStar(email._id)}
+                    />
                   )}
                 </td>
                 <td>{email.to}</td>

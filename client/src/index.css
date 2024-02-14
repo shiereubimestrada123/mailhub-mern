@@ -13,3 +13,41 @@ select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
 }
+
+/* .pagination {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+} */
+
+/* .page-item {
+  margin: 0 2px;
+}
+
+.page-link {
+  color: #007bff;
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  padding: 0.5rem 0.75rem;
+  text-decoration: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.page-link:hover {
+  background-color: #f8f9fa;
+}
+
+.page-item.disabled .page-link {
+  color: #6c757d;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.page-item.active .page-link {
+  z-index: 1;
+  color: #fff;
+  background-color: #007bff;
+  border-color: #007bff;
+} */

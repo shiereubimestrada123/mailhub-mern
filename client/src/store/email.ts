@@ -1,11 +1,25 @@
 import { create } from "zustand";
-import produce from "immer";
 
+type Inbox = {
+  items: {
+    _id: string;
+    from: string;
+    to: string;
+    subject: string;
+    createdAt: Date;
+    updatedAt: Date;
+    favorite: boolean;
+    read: boolean;
+    message: string;
+  }[];
+  totalCount: number;
+};
 type Mailbox<T> = {
-  inbox: T[];
+  inbox: Inbox[];
   outbox: T[];
   drafts: T[];
   trash: T[];
+  pageSize: number;
 };
 type EmailState = {
   mailbox: Mailbox<any>;
@@ -24,6 +38,7 @@ export const useEmailStore = create<EmailState>((set) => ({
     outbox: [],
     drafts: [],
     trash: [],
+    pageSize: 0,
   },
   selectedItem: "inbox",
   isOpen: false,

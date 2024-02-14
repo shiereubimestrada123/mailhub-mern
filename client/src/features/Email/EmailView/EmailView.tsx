@@ -26,7 +26,7 @@ export function EmailView() {
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  let { inbox, outbox, drafts, trash } = mailbox;
+  let { inbox, outbox, drafts, trash, pageSize } = mailbox;
 
   const {
     register,
@@ -72,9 +72,9 @@ export function EmailView() {
     setCurrentPage(page);
   };
 
-  useEffect(() => {
-    console.log("EmailView - currentPage:", currentPage);
-  }, [currentPage]);
+  // useEffect(() => {
+  //   console.log("EmailView - currentPage:", currentPage);
+  // }, [currentPage]);
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: async (newTodo) => {
@@ -102,12 +102,19 @@ export function EmailView() {
         inbox={inbox}
         currentPage={currentPage}
         onPageChange={handlePageChange}
-        emailsPerPage={10}
+        pageSize={pageSize}
       />
     ),
     starred: <Starred />,
     drafts: <Drafts />,
-    sent: <Sent outbox={outbox} />,
+    sent: (
+      <Sent
+        outbox={outbox}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+        pageSize={pageSize}
+      />
+    ),
     trash: <Trash />,
   };
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CiStar } from "react-icons/ci";
 import { FaStar } from "react-icons/fa";
+import { Pagination } from "@components";
 
 type Email = {
   _id: string;
@@ -8,12 +9,35 @@ type Email = {
   subject: string;
 };
 
-type SendProps = {
-  outbox: Email[];
+type Outbox = {
+  items: Email[];
+  totalCount: number;
 };
 
-export function Sent({ outbox }: SendProps) {
+type SendProps = {
+  outbox: Outbox;
+  currentPage: number;
+  onPageChange: (page: number) => void;
+  pageSize: number;
+};
+
+export function Sent({
+  outbox,
+  currentPage,
+  onPageChange,
+  pageSize,
+}: SendProps) {
+  if (!outbox || !outbox.items) {
+    return <div>Loading...</div>;
+  }
+
   const [starredEmails, setStarredEmails] = useState<string[]>([]);
+
+  const totalPages = Math.ceil(outbox.totalCount / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, outbox.totalCount);
+
+  const visibleEmails = outbox.items.slice(0, endIndex);
 
   const toggleStar = (emailId: string) => {
     if (starredEmails.includes(emailId)) {
@@ -40,18 +64,24 @@ export function Sent({ outbox }: SendProps) {
             </tr>
           </thead>
           <tbody>
-            {outbox.map((email) => (
+            {visibleEmails.map((email) => (
               <tr key={email._id} className="cursor-pointer hover:bg-gray-200">
                 <td>
                   <label>
                     <input type="checkbox" className="checkbox" />
                   </label>
                 </td>
-                <td onClick={() => toggleStar(email._id)}>
+                <td>
                   {!starredEmails.includes(email._id) ? (
-                    <CiStar className="pb-1 text-3xl" />
+                    <CiStar
+                      className="pb-1 text-3xl"
+                      onClick={() => toggleStar(email._id)}
+                    />
                   ) : (
-                    <FaStar className="pb-1 text-3xl" />
+                    <FaStar
+                      className="pb-1 text-3xl"
+                      onClick={() => toggleStar(email._id)}
+                    />
                   )}
                 </td>
                 <td>{email.to}</td>
@@ -61,6 +91,11 @@ export function Sent({ outbox }: SendProps) {
           </tbody>
         </table>
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </section>
   );
 }

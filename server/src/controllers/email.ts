@@ -46,6 +46,10 @@ export async function getAllEmails(
       _id: { $in: currentUserAccount.mailbox.inbox },
     });
 
+    const outboxCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.outbox },
+    });
+
     const inbox = await Email.find({
       _id: { $in: currentUserAccount.mailbox.inbox },
     })
@@ -56,9 +60,14 @@ export async function getAllEmails(
     const draftsCount = await Email.countDocuments({
       _id: { $in: currentUserAccount.mailbox.drafts },
     });
-    const outboxCount = await Email.countDocuments({
+
+    const outbox = await Email.find({
       _id: { $in: currentUserAccount.mailbox.outbox },
-    });
+    })
+      .sort({ createdAt: -1 })
+      .skip((parsedPage - 1) * parsedPageSize)
+      .limit(parsedPageSize);
+
     const trashCount = await Email.countDocuments({
       _id: { $in: currentUserAccount.mailbox.trash },
     });
@@ -70,13 +79,14 @@ export async function getAllEmails(
         totalCount: draftsCount,
       },
       outbox: {
-        items: currentUserAccount.mailbox.outbox,
+        items: outbox,
         totalCount: outboxCount,
       },
       trash: {
         items: currentUserAccount.mailbox.trash,
         totalCount: trashCount,
       },
+      pageSize: parsedPageSize,
     };
 
     response.status(200).json({ message: "Emails found", emails });
@@ -85,43 +95,6 @@ export async function getAllEmails(
     response.status(500).json({ message: "Internal server error" });
   }
 }
-
-// export async function getAllEmails(
-//   request: AuthenticatedRequest,
-//   response: Response
-// ) {
-//   try {
-//     const currentUserAccount = await Account.findOne({ _id: request.user })
-//       .populate({
-//         path: "mailbox.inbox",
-//         options: { sort: { createdAt: -1 } },
-//       })
-//       .populate("mailbox.drafts")
-//       .populate({
-//         path: "mailbox.outbox",
-//         options: { sort: { createdAt: -1 } },
-//       })
-//       .populate("mailbox.trash");
-
-//     if (!currentUserAccount || !currentUserAccount.mailbox) {
-//       return response.status(404).json({ message: "Account not found" });
-//     }
-
-//     const { inbox, drafts, outbox, trash } = currentUserAccount.mailbox;
-
-//     const emails = {
-//       inbox,
-//       drafts,
-//       outbox,
-//       trash,
-//     };
-
-//     response.status(200).json({ message: "Emails found", emails });
-//   } catch (error) {
-//     console.log(error);
-//     response.status(500).json({ message: "Internal server error" });
-//   }
-// }
 
 export async function sendEmail(
   request: AuthenticatedRequest,
