@@ -16,7 +16,7 @@ type ComposeProps = {
 
 export function EmailView() {
   const { category = "inbox" } = useParams();
-  const token = useAuthStore((state) => state.token);
+  // const token = useAuthStore((state) => state.token);
   const isOpen = useEmailStore((state) => state.isOpen);
   const setIsOpen = useEmailStore((state) => state.setIsOpen);
   const email = useAuthStore((state) => state.userAccount.user?.email);

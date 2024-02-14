@@ -2,20 +2,10 @@ import { useState } from "react";
 import { CiStar } from "react-icons/ci";
 import { FaStar } from "react-icons/fa";
 import { Pagination } from "@components";
-
-type Email = {
-  _id: string;
-  to: string;
-  subject: string;
-};
-
-type Outbox = {
-  items: Email[];
-  totalCount: number;
-};
+import { OutboxCategory } from "@types";
 
 type SendProps = {
-  outbox: Outbox;
+  outbox: OutboxCategory;
   currentPage: number;
   onPageChange: (page: number) => void;
   pageSize: number;
@@ -33,12 +23,6 @@ export function Sent({
 
   const [starredEmails, setStarredEmails] = useState<string[]>([]);
 
-  const totalPages = Math.ceil(outbox.totalCount / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, outbox.totalCount);
-
-  const visibleEmails = outbox.items.slice(0, endIndex);
-
   const toggleStar = (emailId: string) => {
     if (starredEmails.includes(emailId)) {
       setStarredEmails(starredEmails.filter((id) => id !== emailId));
@@ -46,6 +30,11 @@ export function Sent({
       setStarredEmails([...starredEmails, emailId]);
     }
   };
+
+  const totalPages = Math.ceil(outbox.totalCount / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, outbox.totalCount);
+  const visibleEmails = outbox.items.slice(0, endIndex);
 
   return (
     <section className="w-full">

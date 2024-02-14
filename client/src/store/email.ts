@@ -1,28 +1,7 @@
 import { create } from "zustand";
-
-// type Inbox = {
-//   items: {
-//     _id: string;
-//     from: string;
-//     to: string;
-//     subject: string;
-//     createdAt: Date;
-//     updatedAt: Date;
-//     favorite: boolean;
-//     read: boolean;
-//     message: string;
-//   }[];
-//   totalCount: number;
-// };
-type Mailbox<T> = {
-  inbox: T[];
-  outbox: T[];
-  drafts: T[];
-  trash: T[];
-  pageSize: number;
-};
+import { Mailbox } from "@types";
 type EmailState = {
-  mailbox: Mailbox<any>;
+  mailbox: Mailbox;
   setMailbox: (mailbox: any) => void;
   getMailBox: (mailbox: any) => void;
 
@@ -34,8 +13,14 @@ type EmailState = {
 
 export const useEmailStore = create<EmailState>((set) => ({
   mailbox: {
-    inbox: [],
-    outbox: [],
+    inbox: {
+      items: [],
+      totalCount: 0,
+    },
+    outbox: {
+      items: [],
+      totalCount: 0,
+    },
     drafts: [],
     trash: [],
     pageSize: 0,
@@ -43,18 +28,16 @@ export const useEmailStore = create<EmailState>((set) => ({
   selectedItem: "inbox",
   isOpen: false,
 
-  setMailbox: (newMailbox) => {
-    console.log("newMailbox", newMailbox);
-    // set((state) => {
-    //   const updatedMailbox = {
-    //     ...state.mailbox,
-    //     // ...newMailbox.emails,
-    //     ...newMailbox,
-    //   };
+  setMailbox: (newMailbox) =>
+    set((state) => {
+      const updatedMailbox = {
+        ...state.mailbox,
+        // ...newMailbox.emails,
+        ...newMailbox,
+      };
 
-    //   return { mailbox: updatedMailbox };
-    // }),
-  },
+      return { mailbox: updatedMailbox };
+    }),
 
   getMailBox: (newMailbox) =>
     set((state) => {
