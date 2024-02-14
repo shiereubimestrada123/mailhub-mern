@@ -15,8 +15,8 @@ export const router = createBrowserRouter(
       <Route path="/email" element={<EmailPage />}>
         <Route path=":category/*" element={<EmailView />} />
       </Route>
-      {/* <Route path="/not-found" element={<NotFoundPage />} />
-      <Route path="*" element={<Navigate to="/not-found" replace />} /> */}
+      <Route path="/not-found" element={<NotFoundPage />} />
+      <Route path="*" element={<Navigate to="/not-found" replace />} />
     </Route>,
   ),
 );
