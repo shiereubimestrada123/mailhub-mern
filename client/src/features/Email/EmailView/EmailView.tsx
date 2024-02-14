@@ -50,7 +50,7 @@ export function EmailView() {
     const fetchMailBox = async () => {
       try {
         const responseData = await get(`/email?page=${currentPage}`);
-        getMailBox(responseData); // Update Zustand state directly
+        getMailBox(responseData);
       } catch (error) {
         console.error("Error fetching mailbox:", error);
       }
@@ -85,8 +85,19 @@ export function EmailView() {
   const onSubmit: SubmitHandler<ComposeProps> = async (data) => {
     try {
       const response = await mutateAsync(data as any);
-      console.log(response);
-      setMailbox({ inbox: response.received, outbox: response.sent });
+
+      setMailbox({
+        inbox: {
+          items: [...inbox.items, response.received],
+          totalCount: inbox.totalCount + 1,
+        },
+        outbox: {
+          items: [...outbox.items, response.sent],
+          totalCount: outbox.totalCount + 1,
+        },
+        drafts: drafts,
+        trash: trash,
+      });
     } catch (error: unknown) {
       console.log(error);
       // if (axios.isAxiosError(error)) setToast(error?.response?.data);
@@ -123,93 +134,97 @@ export function EmailView() {
   );
 
   return (
-    <section className="w-5/6 p-2">
-      <div>{categories}</div>
-      {isOpen && (
-        <Modal>
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="flex h-[420px] flex-col"
-          >
-            <FormInput
-              id="from"
-              type="text"
-              labelText="From: "
-              classLabel="w-full flex border-b"
-              classInput="w-full outline-none p-2"
-              register={register("from", {
-                required: {
-                  value: true,
-                  message: "Sender email is required",
-                },
-                pattern:
-                  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-              })}
-              errorRequired={
-                errors.from?.type === "required" && errors.from?.message
-              }
-              errorPattern={errors.from?.type === "pattern" && "Invalid email"}
-            />
-            <FormInput
-              id="to"
-              type="text"
-              labelText="To: "
-              classLabel="w-full flex border-b"
-              classInput="w-full outline-none p-2"
-              register={register("to", {
-                required: {
-                  value: true,
-                  message: "Recipient email is required",
-                },
-                pattern:
-                  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-              })}
-              errorRequired={
-                errors.to?.type === "required" && errors.to?.message
-              }
-              errorPattern={errors.to?.type === "pattern" && "Invalid email"}
-            />
-            <FormInput
-              id="subject"
-              type="text"
-              labelText="Subject: "
-              classLabel="w-full flex border-b"
-              classInput="w-full outline-none p-2"
-              register={register("subject", {
-                required: {
-                  value: true,
-                  message: "Subject is required",
-                },
-              })}
-              errorRequired={
-                errors.subject?.type === "required" && errors.subject?.message
-              }
-            />
-            <textarea
-              id="message"
-              className="my-2 grow resize-none border-b outline-none"
-              {...register("message", {
-                required: {
-                  value: true,
-                  message: "Message is required",
-                },
-              })}
-            />
-            <span className="text-red-500">
-              {errors.message?.type === "required" && errors.message?.message}
-            </span>
-            <div className="inline-flex">
-              <Button
-                type="submit"
-                className="btn btn-primary btn-active mt-3 text-slate-100"
-                disabled={isSubmitting || isPending}
-              >
-                Send
-              </Button>
-            </div>
-          </form>
-        </Modal>
-      )}
+    <section className="h-screen w-5/6 p-2">
+      <div className="max-h-full overflow-auto">
+        <div>{categories}</div>
+        {isOpen && (
+          <Modal>
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="flex h-[420px] flex-col"
+            >
+              <FormInput
+                id="from"
+                type="text"
+                labelText="From: "
+                classLabel="w-full flex border-b"
+                classInput="w-full outline-none p-2"
+                register={register("from", {
+                  required: {
+                    value: true,
+                    message: "Sender email is required",
+                  },
+                  pattern:
+                    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                })}
+                errorRequired={
+                  errors.from?.type === "required" && errors.from?.message
+                }
+                errorPattern={
+                  errors.from?.type === "pattern" && "Invalid email"
+                }
+              />
+              <FormInput
+                id="to"
+                type="text"
+                labelText="To: "
+                classLabel="w-full flex border-b"
+                classInput="w-full outline-none p-2"
+                register={register("to", {
+                  required: {
+                    value: true,
+                    message: "Recipient email is required",
+                  },
+                  pattern:
+                    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                })}
+                errorRequired={
+                  errors.to?.type === "required" && errors.to?.message
+                }
+                errorPattern={errors.to?.type === "pattern" && "Invalid email"}
+              />
+              <FormInput
+                id="subject"
+                type="text"
+                labelText="Subject: "
+                classLabel="w-full flex border-b"
+                classInput="w-full outline-none p-2"
+                register={register("subject", {
+                  required: {
+                    value: true,
+                    message: "Subject is required",
+                  },
+                })}
+                errorRequired={
+                  errors.subject?.type === "required" && errors.subject?.message
+                }
+              />
+              <textarea
+                id="message"
+                className="my-2 grow resize-none border-b outline-none"
+                {...register("message", {
+                  required: {
+                    value: true,
+                    message: "Message is required",
+                  },
+                })}
+              />
+              <span className="text-red-500">
+                {errors.message?.type === "required" && errors.message?.message}
+              </span>
+              <div className="inline-flex">
+                <Button
+                  type="submit"
+                  className="btn btn-primary btn-active mt-3 text-slate-100"
+                  disabled={isSubmitting || isPending}
+                >
+                  Send
+                </Button>
+              </div>
+            </form>
+          </Modal>
+        )}
+      </div>
     </section>
   );
 }

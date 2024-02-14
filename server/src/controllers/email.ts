@@ -11,7 +11,7 @@ export async function getAllEmails(
   response: Response
 ) {
   try {
-    const { page = "1", pageSize = "10" } = request.query;
+    const { page = "1", pageSize = "25" } = request.query;
     const parsedPage = parseInt(page as string, 10);
     const parsedPageSize = parseInt(pageSize as string, 10);
 
