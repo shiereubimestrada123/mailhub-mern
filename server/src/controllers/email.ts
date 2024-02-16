@@ -50,16 +50,20 @@ export async function getAllEmails(
       _id: { $in: currentUserAccount.mailbox.outbox },
     });
 
+    const draftsCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.drafts },
+    });
+
+    const trashCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.trash },
+    });
+
     const inbox = await Email.find({
       _id: { $in: currentUserAccount.mailbox.inbox },
     })
       .sort({ createdAt: -1 })
       .skip((parsedPage - 1) * parsedPageSize)
       .limit(parsedPageSize);
-
-    const draftsCount = await Email.countDocuments({
-      _id: { $in: currentUserAccount.mailbox.drafts },
-    });
 
     const outbox = await Email.find({
       _id: { $in: currentUserAccount.mailbox.outbox },
@@ -68,20 +72,17 @@ export async function getAllEmails(
       .skip((parsedPage - 1) * parsedPageSize)
       .limit(parsedPageSize);
 
-    const trashCount = await Email.countDocuments({
-      _id: { $in: currentUserAccount.mailbox.trash },
-    });
+    const drafts = await Email.find({
+      _id: { $in: currentUserAccount.mailbox.drafts },
+    })
+      .sort({ createdAt: -1 })
+      .skip((parsedPage - 1) * parsedPageSize)
+      .limit(parsedPageSize);
 
     const emails = {
       inbox: { items: inbox, totalCount: inboxCount },
-      drafts: {
-        items: currentUserAccount.mailbox.drafts,
-        totalCount: draftsCount,
-      },
-      outbox: {
-        items: outbox,
-        totalCount: outboxCount,
-      },
+      drafts: { items: drafts, totalCount: draftsCount },
+      outbox: { items: outbox, totalCount: outboxCount },
       trash: {
         items: currentUserAccount.mailbox.trash,
         totalCount: trashCount,
@@ -161,5 +162,38 @@ export async function sendEmail(
   } catch (error) {
     console.log(error);
     response.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function saveDraft(
+  request: AuthenticatedRequest,
+  response: Response
+) {
+  try {
+    let newDraft = new Email({
+      from: request.body.from,
+      to: request.body.to,
+      subject: request.body.subject,
+      message: request.body.message,
+    });
+
+    const savedDraft = await newDraft.save();
+    response.status(201).json({ message: "Draft saved", draft: savedDraft });
+
+    const foundAccount = await Account.findOne({ _id: request.user });
+    if (!foundAccount) return;
+    if (!foundAccount.mailbox) {
+      foundAccount.mailbox = {
+        inbox: [],
+        outbox: [],
+        drafts: [],
+        trash: [],
+      };
+    }
+    foundAccount.mailbox.drafts.push(savedDraft._id);
+    await foundAccount.save();
+  } catch (error) {
+    console.log(error);
+    response.status(500);
   }
 }

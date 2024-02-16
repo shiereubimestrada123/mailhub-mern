@@ -21,7 +21,10 @@ export const useEmailStore = create<EmailState>((set) => ({
       items: [],
       totalCount: 0,
     },
-    drafts: [],
+    drafts: {
+      items: [],
+      totalCount: 0,
+    },
     trash: [],
     pageSize: 0,
   },

@@ -16,6 +16,7 @@ type ComposeProps = {
 
 export function EmailView() {
   const { category = "inbox" } = useParams();
+  const [currentPage, setCurrentPage] = useState(1);
   // const token = useAuthStore((state) => state.token);
   const isOpen = useEmailStore((state) => state.isOpen);
   const setIsOpen = useEmailStore((state) => state.setIsOpen);
@@ -24,15 +25,14 @@ export function EmailView() {
   const mailbox = useEmailStore((state) => state.mailbox);
   const getMailBox = useEmailStore((state) => state.getMailBox);
 
-  const [currentPage, setCurrentPage] = useState(1);
-
   let { inbox, outbox, drafts, trash, pageSize } = mailbox;
-
+  console.log("mailbox", mailbox);
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    watch,
   } = useForm<ComposeProps>({
     defaultValues: {
       from: email,
@@ -72,35 +72,69 @@ export function EmailView() {
     setCurrentPage(page);
   };
 
-  const { mutateAsync, isPending } = useMutation({
-    mutationFn: async (newTodo) => {
-      return await post("/email/sent", newTodo);
+  const { mutateAsync: mutateDraft, isPending: isDraftPending } = useMutation({
+    mutationFn: async (newEmail) => {
+      return await post("/email/draft", newEmail);
+    },
+  });
+
+  const saveDraft = async (data: ComposeProps) => {
+    try {
+      const response = await mutateDraft(data as any);
+
+      const updatedItems = [...mailbox.drafts.items, response.draft];
+
+      updatedItems.sort((a, b) => {
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      });
+
+      setMailbox({
+        ...mailbox,
+        drafts: {
+          ...mailbox.drafts,
+          items: updatedItems,
+          totalCount: mailbox.drafts.totalCount + 1,
+        },
+      });
+
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error saving draft:", error);
+    }
+  };
+
+  const { mutateAsync: mutateSend, isPending: isSendPending } = useMutation({
+    mutationFn: async (newEmail) => {
+      return await post("/email/sent", newEmail);
     },
   });
 
   const onSubmit: SubmitHandler<ComposeProps> = async (data) => {
     try {
-      const response = await mutateAsync(data as any);
+      const response = await mutateSend(data as any);
+
+      const updatedItems = [...mailbox.outbox.items, response.sent];
+
+      updatedItems.sort((a, b) => {
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      });
 
       setMailbox({
-        // inbox: {
-        //   items: [...inbox.items, response.received],
-        //   totalCount: inbox.totalCount + 1,
-        // },
+        ...mailbox,
         outbox: {
-          items: [...outbox.items, response.sent],
-          totalCount: outbox.totalCount + 1,
+          ...mailbox.outbox,
+          items: updatedItems,
+          totalCount: mailbox.outbox.totalCount + 1,
         },
-        drafts: drafts,
-        trash: trash,
       });
     } catch (error: unknown) {
       console.log(error);
-      // if (axios.isAxiosError(error)) setToast(error?.response?.data);
     } finally {
       reset();
-      const responseData = await get(`/email?page=${currentPage}`);
-      getMailBox(responseData);
       setIsOpen(false);
     }
   };
@@ -115,7 +149,14 @@ export function EmailView() {
       />
     ),
     starred: <Starred />,
-    drafts: <Drafts />,
+    drafts: (
+      <Drafts
+        drafts={drafts}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+        pageSize={pageSize}
+      />
+    ),
     sent: (
       <Sent
         outbox={outbox}
@@ -136,7 +177,7 @@ export function EmailView() {
       <div className="max-h-full overflow-auto">
         <div>{categories}</div>
         {isOpen && (
-          <Modal>
+          <Modal saveDraft={saveDraft} formData={watch()}>
             <form
               onSubmit={handleSubmit(onSubmit)}
               className="flex h-[420px] flex-col"
@@ -214,7 +255,7 @@ export function EmailView() {
                 <Button
                   type="submit"
                   className="btn btn-primary btn-active mt-3 text-slate-100"
-                  disabled={isSubmitting || isPending}
+                  disabled={isSubmitting || isSendPending || isDraftPending}
                 >
                   Send
                 </Button>

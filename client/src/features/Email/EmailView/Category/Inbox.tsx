@@ -2,7 +2,7 @@ import { useState } from "react";
 import { CiStar } from "react-icons/ci";
 import { FaStar } from "react-icons/fa";
 import { Pagination } from "@components";
-import { InboxCategory } from "@types";
+import { InboxCategory, Items } from "@types";
 
 type InboxProps = {
   inbox: InboxCategory;
@@ -49,7 +49,7 @@ export function Inbox({
             </tr>
           </thead>
           <tbody>
-            {inboxItems.map((item) => (
+            {inboxItems.map((item: Items) => (
               <tr key={item._id} className="cursor-pointer hover:bg-gray-200">
                 <td>
                   <label>

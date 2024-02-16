@@ -1,4 +1,4 @@
-type Items = {
+export type Items = {
   _id: string;
   from: string;
   to: string;
@@ -20,10 +20,15 @@ export type OutboxCategory = {
   totalCount: number;
 };
 
+export type DraftsCategory = {
+  items: Items[];
+  totalCount: number;
+};
+
 export type Mailbox = {
   inbox: InboxCategory;
   outbox: OutboxCategory;
-  drafts: any[];
+  drafts: DraftsCategory;
   trash: any[];
   pageSize: number;
 };

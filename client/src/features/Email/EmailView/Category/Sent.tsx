@@ -2,7 +2,7 @@ import { useState } from "react";
 import { CiStar } from "react-icons/ci";
 import { FaStar } from "react-icons/fa";
 import { Pagination } from "@components";
-import { OutboxCategory } from "@types";
+import { Items, OutboxCategory } from "@types";
 
 type SendProps = {
   outbox: OutboxCategory;
@@ -49,7 +49,7 @@ export function Sent({
             </tr>
           </thead>
           <tbody>
-            {outboxItems.map((item) => (
+            {outboxItems.map((item: Items) => (
               <tr key={item._id} className="cursor-pointer hover:bg-gray-200">
                 <td>
                   <label>
