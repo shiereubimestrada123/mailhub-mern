@@ -3,6 +3,7 @@ import { CiStar } from "react-icons/ci";
 import { FaStar } from "react-icons/fa";
 import { Pagination } from "@components";
 import { DraftsCategory, Items } from "@types";
+import { DraftEmailModal } from "..";
 
 type DraftsProps = {
   drafts: DraftsCategory;
@@ -18,6 +19,7 @@ export function Drafts({
   pageSize,
 }: DraftsProps) {
   const [starredEmails, setStarredEmails] = useState<string[]>([]);
+  const [selectedDraft, setSelectedDraft] = useState<Items | null>(null);
 
   const toggleStar = (draftId: string) => {
     if (starredEmails.includes(draftId)) {
@@ -25,6 +27,13 @@ export function Drafts({
     } else {
       setStarredEmails([...starredEmails, draftId]);
     }
+  };
+
+  const handleDraftClick = (draft: Items) => {
+    setSelectedDraft(draft);
+  };
+  const handleCloseModal = () => {
+    setSelectedDraft(null);
   };
 
   const totalPages = Math.ceil(drafts.totalCount / pageSize);
@@ -50,7 +59,11 @@ export function Drafts({
           </thead>
           <tbody>
             {draftsItems.map((item: Items) => (
-              <tr key={item._id} className="cursor-pointer hover:bg-gray-200">
+              <tr
+                key={item._id}
+                className="cursor-pointer hover:bg-gray-200"
+                onClick={() => handleDraftClick(item)}
+              >
                 <td>
                   <label>
                     <input type="checkbox" className="checkbox" />
@@ -81,6 +94,17 @@ export function Drafts({
         totalPages={totalPages}
         onPageChange={onPageChange}
       />
+
+      <div className="h-screen w-5/6 p-2">
+        <div className="max-h-full overflow-auto">
+          {selectedDraft && (
+            <DraftEmailModal
+              onClose={handleCloseModal}
+              selectedDraft={selectedDraft}
+            />
+          )}
+        </div>
+      </div>
     </section>
   );
 }

@@ -31,7 +31,7 @@ export function ComposeEmailModal() {
       message: "",
     },
   });
-
+  console.log("errors", errors);
   const { mutateAsync: mutateDraft, isPending: isDraftPending } = useMutation({
     mutationFn: async (newEmail) => {
       return await post("/email/draft", newEmail);
@@ -125,7 +125,7 @@ export function ComposeEmailModal() {
 
   return (
     <>
-      <Modal saveDraft={saveDraft} formData={watch()} onClose={onClose}>
+      <Modal onClose={onClose}>
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex h-[420px] flex-col"
