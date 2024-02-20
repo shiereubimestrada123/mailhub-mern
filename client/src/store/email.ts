@@ -1,14 +1,17 @@
 import { create } from "zustand";
 import { Mailbox } from "@types";
+
 type EmailState = {
   mailbox: Mailbox;
   setMailbox: (mailbox: any) => void;
   getMailBox: (mailbox: any) => void;
 
   selectedItem: string;
-  isOpen: boolean;
+  isOpenCompose: boolean;
+  isOpenDraft: boolean;
   setSelectedItem: (label: string) => void;
-  setIsOpen: (isOpen: boolean) => void;
+  setIsOpenCompose: (isOpen: boolean) => void;
+  setIsOpenDraft: (isOpen: boolean) => void;
 };
 
 export const useEmailStore = create<EmailState>((set) => ({
@@ -29,13 +32,13 @@ export const useEmailStore = create<EmailState>((set) => ({
     pageSize: 0,
   },
   selectedItem: "inbox",
-  isOpen: false,
+  isOpenCompose: false,
+  isOpenDraft: false,
 
   setMailbox: (newMailbox) =>
     set((state) => {
       const updatedMailbox = {
         ...state.mailbox,
-        // ...newMailbox.emails,
         ...newMailbox,
       };
 
@@ -54,5 +57,7 @@ export const useEmailStore = create<EmailState>((set) => ({
 
   setSelectedItem: (label: string) => set({ selectedItem: label }),
 
-  setIsOpen: (isOpen: boolean) => set({ isOpen }),
+  setIsOpenCompose: (isOpen: boolean) => set({ isOpenCompose: isOpen }),
+
+  setIsOpenDraft: (isOpen: boolean) => set({ isOpenDraft: isOpen }),
 }));

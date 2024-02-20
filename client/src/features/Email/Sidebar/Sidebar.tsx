@@ -20,7 +20,7 @@ export function Sidebar() {
   const [showMore, setShowMore] = useState(false);
   const selectedItem = useEmailStore((state) => state.selectedItem);
   const setSelectedItem = useEmailStore((state) => state.setSelectedItem);
-  const setIsOpen = useEmailStore((state) => state.setIsOpen);
+  const setIsOpenCompose = useEmailStore((state) => state.setIsOpenCompose);
 
   const toggleShowMore = () => setShowMore(!showMore);
 
@@ -36,7 +36,7 @@ export function Sidebar() {
         className="btn btn-primary btn-active btn-block mb-3 text-slate-100"
         onClick={(e) => {
           e.stopPropagation();
-          setIsOpen(true);
+          setIsOpenCompose(true);
         }}
       >
         <span className="hidden sm:block md:block">Compose</span>
