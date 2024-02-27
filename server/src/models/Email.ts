@@ -17,6 +17,7 @@ const instance = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    category: String,
   },
   {
     timestamps: true,
