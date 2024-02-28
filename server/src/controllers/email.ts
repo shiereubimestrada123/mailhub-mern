@@ -102,22 +102,18 @@ export async function getEmailById(
 ) {
   try {
     const { category, categoryId } = request.params;
-    console.log("category", category);
-    console.log("categoryId", categoryId);
-    // Validate if category and categoryId are provided
+
     if (!category || !categoryId) {
       return response
         .status(400)
         .json({ message: "Category or categoryId is missing" });
     }
 
-    // Fetch email by category and categoryId
     const email = await Email.findOne({ _id: categoryId });
     if (!email) {
       return response.status(404).json({ message: "Email not found" });
     }
-    console.log("email", email);
-    // Check if the email belongs to the requested category
+
     if (email.category !== category) {
       return response
         .status(404)
