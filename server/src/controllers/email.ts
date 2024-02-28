@@ -10,7 +10,7 @@ export async function getAllEmails(
   response: Response
 ) {
   try {
-    const { page = "1", pageSize = "10", category } = request.query;
+    const { page = "1", pageSize = "10" } = request.query;
     const parsedPage = parseInt(page as string, 10);
     const parsedPageSize = parseInt(pageSize as string, 10);
 
@@ -41,35 +41,55 @@ export async function getAllEmails(
       return response.status(404).json({ message: "Account not found" });
     }
 
-    // Cast category to string
-    const parsedCategory = category as string;
+    const inboxCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.inbox },
+    });
 
-    // Filter emails based on category if provided
-    let emailFilter = {};
-    if (parsedCategory) {
-      if (!["inbox", "outbox", "drafts", "trash"].includes(parsedCategory)) {
-        return response.status(400).json({ message: "Invalid category" });
-      }
-      // Type assertion to inform TypeScript that parsedCategory is a valid key
-      emailFilter = {
-        _id: {
-          $in: currentUserAccount.mailbox[
-            parsedCategory as keyof typeof currentUserAccount.mailbox
-          ],
-        },
-      };
-    }
+    const outboxCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.outbox },
+    });
 
-    const emailCount = await Email.countDocuments(emailFilter);
+    const draftsCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.drafts },
+    });
 
-    const emails = await Email.find(emailFilter)
+    const trashCount = await Email.countDocuments({
+      _id: { $in: currentUserAccount.mailbox.trash },
+    });
+
+    const inbox = await Email.find({
+      _id: { $in: currentUserAccount.mailbox.inbox },
+    })
       .sort({ createdAt: -1 })
       .skip((parsedPage - 1) * parsedPageSize)
       .limit(parsedPageSize);
 
-    response
-      .status(200)
-      .json({ message: "Emails found", emails, totalCount: emailCount });
+    const outbox = await Email.find({
+      _id: { $in: currentUserAccount.mailbox.outbox },
+    })
+      .sort({ createdAt: -1 })
+      .skip((parsedPage - 1) * parsedPageSize)
+      .limit(parsedPageSize);
+
+    const drafts = await Email.find({
+      _id: { $in: currentUserAccount.mailbox.drafts },
+    })
+      .sort({ createdAt: -1 })
+      .skip((parsedPage - 1) * parsedPageSize)
+      .limit(parsedPageSize);
+
+    const emails = {
+      inbox: { items: inbox, totalCount: inboxCount },
+      drafts: { items: drafts, totalCount: draftsCount },
+      outbox: { items: outbox, totalCount: outboxCount },
+      trash: {
+        items: currentUserAccount.mailbox.trash,
+        totalCount: trashCount,
+      },
+      pageSize: parsedPageSize,
+    };
+
+    response.status(200).json({ message: "Emails found", emails });
   } catch (error) {
     console.error("Error fetching emails:", error);
     response.status(500).json({ message: "Internal server error" });
@@ -82,7 +102,8 @@ export async function getEmailById(
 ) {
   try {
     const { category, categoryId } = request.params;
-
+    console.log("category", category);
+    console.log("categoryId", categoryId);
     // Validate if category and categoryId are provided
     if (!category || !categoryId) {
       return response
@@ -95,7 +116,7 @@ export async function getEmailById(
     if (!email) {
       return response.status(404).json({ message: "Email not found" });
     }
-
+    console.log("email", email);
     // Check if the email belongs to the requested category
     if (email.category !== category) {
       return response
@@ -138,6 +159,7 @@ export async function sendEmail(
       to: request.body.to,
       subject: request.body.subject,
       message: request.body.message,
+      category: "sent",
     });
     const savedEmailSend = await newEmailSend.save();
 
@@ -159,6 +181,7 @@ export async function sendEmail(
       to: receiverAccount.email,
       subject: request.body.subject,
       message: request.body.message,
+      category: "received", // Assuming the category for received emails is "received"
     });
     const savedEmailIn = await newEmailReceive.save();
 
@@ -188,6 +211,7 @@ export async function saveDraft(
       to: request.body.to,
       subject: request.body.subject,
       message: request.body.message,
+      category: "drafts",
     });
 
     const savedDraft = await newDraft.save();
