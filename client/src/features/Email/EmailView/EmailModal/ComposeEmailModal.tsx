@@ -31,7 +31,7 @@ export function ComposeEmailModal() {
       message: "",
     },
   });
-  console.log("errors", errors);
+
   const { mutateAsync: mutateDraft, isPending: isDraftPending } = useMutation({
     mutationFn: async (newEmail) => {
       return await post("/email/draft", newEmail);

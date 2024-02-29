@@ -36,9 +36,6 @@ export function Drafts({
     setSelectedDraft(draft);
     navigate(`drafts/${draft._id}`);
   };
-  const handleCloseModal = () => {
-    setSelectedDraft(null);
-  };
 
   const totalPages = Math.ceil(drafts.totalCount / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
@@ -103,7 +100,7 @@ export function Drafts({
         <div className="max-h-full overflow-auto">
           {selectedDraft && (
             <DraftEmailModal
-              onClose={handleCloseModal}
+              setSelectedDraft={setSelectedDraft}
               selectedDraft={selectedDraft}
             />
           )}

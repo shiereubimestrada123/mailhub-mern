@@ -96,37 +96,6 @@ export async function getAllEmails(
   }
 }
 
-export async function getEmailById(
-  request: AuthenticatedRequest,
-  response: Response
-) {
-  try {
-    const { category, categoryId } = request.params;
-
-    if (!category || !categoryId) {
-      return response
-        .status(400)
-        .json({ message: "Category or categoryId is missing" });
-    }
-
-    const email = await Email.findOne({ _id: categoryId });
-    if (!email) {
-      return response.status(404).json({ message: "Email not found" });
-    }
-
-    if (email.category !== category) {
-      return response
-        .status(404)
-        .json({ message: "Email not found in the specified category" });
-    }
-
-    response.status(200).json({ message: "Email found", email });
-  } catch (error) {
-    console.error("Error fetching email by ID:", error);
-    response.status(500).json({ message: "Internal server error" });
-  }
-}
-
 export async function sendEmail(
   request: AuthenticatedRequest,
   response: Response
@@ -228,5 +197,39 @@ export async function saveDraft(
   } catch (error) {
     console.log(error);
     response.status(500);
+  }
+}
+
+export async function editDraft(
+  request: AuthenticatedRequest,
+  response: Response
+) {
+  try {
+    const { id } = request.params;
+    const { from, to, subject, message } = request.body;
+
+    if (!isValidObjectId(id) || !from || !to || !subject || !message) {
+      return response.status(400).json({ message: "Invalid request data" });
+    }
+
+    const draft = await Email.findByIdAndUpdate(
+      id,
+      {
+        from,
+        to,
+        subject,
+        message,
+      },
+      { new: true }
+    );
+
+    if (!draft) {
+      return response.status(404).json({ message: "Draft not found" });
+    }
+
+    response.status(200).json({ message: "Draft edited successfully", draft });
+  } catch (error) {
+    console.error("Error editing draft:", error);
+    response.status(500).json({ message: "Internal server error" });
   }
 }
