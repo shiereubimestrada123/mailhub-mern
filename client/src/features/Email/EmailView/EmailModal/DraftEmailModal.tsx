@@ -4,7 +4,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { Button, FormInput, Modal } from "@components";
 import { Items } from "@types";
 import { useMutation } from "@tanstack/react-query";
-import { put } from "@utils";
+import { post, put } from "@utils";
 import { useEmailStore } from "@store";
 
 type ComposeProps = {
@@ -44,7 +44,7 @@ export function DraftEmailModal({
       _id: selectedDraft?._id || "",
     },
   });
-  console.log("mailbox", mailbox);
+
   const initialSelectedDraft = useRef<Items | null>(selectedDraft);
 
   useEffect(() => {
@@ -99,15 +99,44 @@ export function DraftEmailModal({
     setSelectedDraft(null);
   };
 
+  const { mutateAsync: mutateSend, isPending: isSendPending } = useMutation({
+    mutationFn: async (newEmail) => {
+      return await post(`/email/draft/send/${selectedDraft?._id}`, newEmail);
+    },
+  });
+
   const onSubmit: SubmitHandler<ComposeProps> = async (data) => {
     try {
-      console.log("try");
-      console.log("data", data);
-    } catch (error: unknown) {
+      const response = await mutateSend(data as any);
+
+      const updatedItems = [...mailbox.outbox.items, response.email];
+
+      updatedItems.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+
+      const updatedDrafts = mailbox.drafts.items.filter(
+        (item) => item._id !== response.deletedDraft._id,
+      );
+
+      setMailbox({
+        ...mailbox,
+        drafts: {
+          ...mailbox.drafts,
+          items: updatedDrafts,
+          // totalCount: mailbox.drafts.totalCount + 1,
+        },
+        outbox: {
+          ...mailbox.outbox,
+          items: updatedItems,
+          totalCount: mailbox.outbox.totalCount + 1,
+        },
+      });
+    } catch (error) {
       console.log(error);
     } finally {
-      // reset();
-      // setIsOpenCompose(false);
+      setSelectedDraft(null);
     }
   };
 

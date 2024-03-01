@@ -233,3 +233,61 @@ export async function editDraft(
     response.status(500).json({ message: "Internal server error" });
   }
 }
+
+export async function sendDraftAsEmail(
+  request: AuthenticatedRequest,
+  response: Response
+) {
+  try {
+    const { id } = request.params;
+
+    // Retrieve the latest version of the draft from the database
+    const draft = await Email.findById(id);
+
+    if (!draft) {
+      return response.status(404).json({ message: "Draft not found" });
+    }
+
+    // Update draft data with the payload data
+    draft.from = request.body.from;
+    draft.to = request.body.to;
+    draft.subject = request.body.subject;
+    draft.message = request.body.message;
+    draft.category = "sent";
+
+    // Save the updated draft
+    const updatedDraft = await draft.save();
+
+    // Create a new email using the updated draft content
+    const newEmail = new Email({
+      from: updatedDraft.from,
+      to: updatedDraft.to,
+      subject: updatedDraft.subject,
+      message: updatedDraft.message,
+      category: "sent",
+    });
+
+    // Save the new email
+    const savedEmail = await newEmail.save();
+
+    // Update the sender's outbox
+    const senderAccount = await Account.findOne({ _id: request.user });
+    if (!senderAccount || !senderAccount.mailbox) {
+      return response.status(404).json({ message: "Sender account not found" });
+    }
+    senderAccount.mailbox.outbox.push(savedEmail._id);
+    await senderAccount.save();
+
+    // Delete the draft from the database
+    const deletedDraft = await Email.findByIdAndDelete(id);
+
+    response.status(201).json({
+      message: "Draft sent as new email",
+      email: savedEmail,
+      deletedDraft,
+    });
+  } catch (error) {
+    console.error("Error sending draft as email:", error);
+    response.status(500).json({ message: "Internal server error" });
+  }
+}

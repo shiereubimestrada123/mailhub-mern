@@ -65,6 +65,30 @@ export function ComposeEmailModal() {
     }
   };
 
+  const onClose = () => {
+    const isNewEmail = true;
+
+    if (isNewEmail) {
+      const formData = watch();
+      const defaultValues = {
+        from: email,
+        to: "",
+        subject: "",
+        message: "",
+      };
+
+      const isToChanged = formData.to !== defaultValues.to;
+      const isSubjectChanged = formData.subject !== defaultValues.subject;
+      const isMessageChanged = formData.message !== defaultValues.message;
+
+      if (isToChanged || isSubjectChanged || isMessageChanged) {
+        saveDraft(formData);
+      }
+    }
+
+    setIsOpenCompose(false);
+  };
+
   const { mutateAsync: mutateSend, isPending: isSendPending } = useMutation({
     mutationFn: async (newEmail) => {
       return await post("/email/sent", newEmail);
@@ -97,30 +121,6 @@ export function ComposeEmailModal() {
       reset();
       setIsOpenCompose(false);
     }
-  };
-
-  const onClose = () => {
-    const isNewEmail = true;
-
-    if (isNewEmail) {
-      const formData = watch();
-      const defaultValues = {
-        from: email,
-        to: "",
-        subject: "",
-        message: "",
-      };
-
-      const isToChanged = formData.to !== defaultValues.to;
-      const isSubjectChanged = formData.subject !== defaultValues.subject;
-      const isMessageChanged = formData.message !== defaultValues.message;
-
-      if (isToChanged || isSubjectChanged || isMessageChanged) {
-        saveDraft(formData);
-      }
-    }
-
-    setIsOpenCompose(false);
   };
 
   return (
