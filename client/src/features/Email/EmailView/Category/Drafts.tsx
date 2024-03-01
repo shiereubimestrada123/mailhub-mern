@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { CiStar } from "react-icons/ci";
 import { FaStar } from "react-icons/fa";
 import { Pagination } from "@components";
@@ -18,6 +19,8 @@ export function Drafts({
   onPageChange,
   pageSize,
 }: DraftsProps) {
+  const navigate = useNavigate();
+
   const [starredEmails, setStarredEmails] = useState<string[]>([]);
   const [selectedDraft, setSelectedDraft] = useState<Items | null>(null);
 
@@ -31,9 +34,7 @@ export function Drafts({
 
   const handleDraftClick = (draft: Items) => {
     setSelectedDraft(draft);
-  };
-  const handleCloseModal = () => {
-    setSelectedDraft(null);
+    navigate(`drafts/${draft._id}`);
   };
 
   const totalPages = Math.ceil(drafts.totalCount / pageSize);
@@ -99,7 +100,7 @@ export function Drafts({
         <div className="max-h-full overflow-auto">
           {selectedDraft && (
             <DraftEmailModal
-              onClose={handleCloseModal}
+              setSelectedDraft={setSelectedDraft}
               selectedDraft={selectedDraft}
             />
           )}

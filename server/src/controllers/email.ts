@@ -3,7 +3,6 @@ import { validationResult } from "express-validator";
 import Email from "../models/Email";
 import Account from "../models/Account";
 import { AuthenticatedRequest } from "./../middleware/authToken";
-
 import { isValidObjectId } from "mongoose";
 
 export async function getAllEmails(
@@ -125,6 +124,7 @@ export async function sendEmail(
       to: request.body.to,
       subject: request.body.subject,
       message: request.body.message,
+      category: "sent",
     });
     const savedEmailSend = await newEmailSend.save();
 
@@ -146,6 +146,7 @@ export async function sendEmail(
       to: receiverAccount.email,
       subject: request.body.subject,
       message: request.body.message,
+      category: "received", // Assuming the category for received emails is "received"
     });
     const savedEmailIn = await newEmailReceive.save();
 
@@ -175,6 +176,7 @@ export async function saveDraft(
       to: request.body.to,
       subject: request.body.subject,
       message: request.body.message,
+      category: "drafts",
     });
 
     const savedDraft = await newDraft.save();
@@ -195,5 +197,104 @@ export async function saveDraft(
   } catch (error) {
     console.log(error);
     response.status(500);
+  }
+}
+
+export async function editDraft(
+  request: AuthenticatedRequest,
+  response: Response
+) {
+  try {
+    const { id } = request.params;
+    const { from, to, subject, message } = request.body;
+
+    if (!isValidObjectId(id) || !from || !to || !subject || !message) {
+      return response.status(400).json({ message: "Invalid request data" });
+    }
+
+    const draft = await Email.findByIdAndUpdate(
+      id,
+      {
+        from,
+        to,
+        subject,
+        message,
+      },
+      { new: true }
+    );
+
+    if (!draft) {
+      return response.status(404).json({ message: "Draft not found" });
+    }
+
+    response.status(200).json({ message: "Draft edited successfully", draft });
+  } catch (error) {
+    console.error("Error editing draft:", error);
+    response.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function sendDraftAsEmail(
+  request: AuthenticatedRequest,
+  response: Response
+) {
+  try {
+    const { id } = request.params;
+
+    // Retrieve the latest version of the draft from the database
+    const draft = await Email.findById(id);
+
+    if (!draft) {
+      return response.status(404).json({ message: "Draft not found" });
+    }
+
+    // Update draft data with the payload data
+    draft.from = request.body.from;
+    draft.to = request.body.to;
+    draft.subject = request.body.subject;
+    draft.message = request.body.message;
+    draft.category = "sent";
+
+    // Save the updated draft
+    const updatedDraft = await draft.save();
+
+    // Create a new email using the updated draft content
+    const newEmail = new Email({
+      from: updatedDraft.from,
+      to: updatedDraft.to,
+      subject: updatedDraft.subject,
+      message: updatedDraft.message,
+      category: "sent",
+    });
+
+    // Save the new email
+    const savedEmail = await newEmail.save();
+
+    // Update the sender's outbox
+    const senderAccount = await Account.findOne({ _id: request.user });
+    if (!senderAccount || !senderAccount.mailbox) {
+      return response.status(404).json({ message: "Sender account not found" });
+    }
+    senderAccount.mailbox.outbox.push(savedEmail._id);
+    await senderAccount.save();
+
+    // Update the sender's inbox
+    const receiverAccount = await Account.findOne({ email: request.body.to });
+    if (receiverAccount && receiverAccount.mailbox) {
+      receiverAccount.mailbox.inbox.push(savedEmail._id);
+      await receiverAccount.save();
+    }
+
+    // Delete the draft from the database
+    const deletedDraft = await Email.findByIdAndDelete(id);
+
+    response.status(201).json({
+      message: "Draft sent as new email",
+      email: savedEmail,
+      deletedDraft,
+    });
+  } catch (error) {
+    console.error("Error sending draft as email:", error);
+    response.status(500).json({ message: "Internal server error" });
   }
 }

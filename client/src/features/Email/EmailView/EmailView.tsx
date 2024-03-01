@@ -1,24 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useAuthStore, useEmailStore } from "@store";
-import { post, get } from "@utils";
+import { useEmailStore } from "@store";
+import { get } from "@utils";
 import { ComposeEmailModal } from "./EmailModal";
 import { Drafts, Inbox, Sent, Starred, Trash } from "./Category";
-
-type ComposeProps = {
-  from: string;
-  to: string;
-  subject: string;
-  message: string;
-};
 
 export function EmailView() {
   const { category = "inbox" } = useParams();
   const [currentPage, setCurrentPage] = useState(1);
-  // const token = useAuthStore((state) => state.token);
   const isOpenCompose = useEmailStore((state) => state.isOpenCompose);
-  const email = useAuthStore((state) => state.userAccount.user?.email);
-  const setMailbox = useEmailStore((state) => state.setMailbox);
   const mailbox = useEmailStore((state) => state.mailbox);
   const getMailBox = useEmailStore((state) => state.getMailBox);
 
@@ -31,7 +21,9 @@ export function EmailView() {
   useEffect(() => {
     const fetchMailBox = async () => {
       try {
-        const responseData = await get(`/email?page=${currentPage}`);
+        const responseData = await get(
+          `/email/${category}?page=${currentPage}`,
+        );
         getMailBox(responseData);
       } catch (error) {
         console.error("Error fetching mailbox:", error);
@@ -39,16 +31,7 @@ export function EmailView() {
     };
 
     fetchMailBox();
-  }, [currentPage]);
-
-  // useEffect(() => {
-  //   reset({
-  //     from: email,
-  //     to: "",
-  //     subject: "",
-  //     message: "",
-  //   });
-  // }, [email, reset]);
+  }, [currentPage, category]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
