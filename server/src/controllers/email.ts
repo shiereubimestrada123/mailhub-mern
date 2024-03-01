@@ -278,6 +278,13 @@ export async function sendDraftAsEmail(
     senderAccount.mailbox.outbox.push(savedEmail._id);
     await senderAccount.save();
 
+    // Update the sender's inbox
+    const receiverAccount = await Account.findOne({ email: request.body.to });
+    if (receiverAccount && receiverAccount.mailbox) {
+      receiverAccount.mailbox.inbox.push(savedEmail._id);
+      await receiverAccount.save();
+    }
+
     // Delete the draft from the database
     const deletedDraft = await Email.findByIdAndDelete(id);
 
