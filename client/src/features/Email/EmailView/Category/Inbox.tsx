@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { CiStar } from "react-icons/ci";
 import { FaStar } from "react-icons/fa";
 import { Pagination } from "@components";
@@ -17,7 +18,10 @@ export function Inbox({
   onPageChange,
   pageSize,
 }: InboxProps) {
+  const navigate = useNavigate();
+
   const [starredEmails, setStarredEmails] = useState<string[]>([]);
+  const [selectedInbox, setSelectedInbox] = useState<Items | null>(null);
 
   const toggleStar = (inboxId: string) => {
     if (starredEmails.includes(inboxId)) {
@@ -25,6 +29,12 @@ export function Inbox({
     } else {
       setStarredEmails([...starredEmails, inboxId]);
     }
+  };
+
+  const handleDraftClick = (inbox: Items) => {
+    setSelectedInbox(inbox);
+    // navigate(`inbox/${inbox._id}`);
+    navigate(`/email/inbox/${inbox._id}`);
   };
 
   const totalPages = Math.ceil(inbox.totalCount / pageSize);
@@ -50,7 +60,11 @@ export function Inbox({
           </thead>
           <tbody>
             {inboxItems.map((item: Items) => (
-              <tr key={item._id} className="cursor-pointer hover:bg-gray-200">
+              <tr
+                key={item._id}
+                className="cursor-pointer hover:bg-gray-200"
+                onClick={() => handleDraftClick(item)}
+              >
                 <td>
                   <label>
                     <input type="checkbox" className="checkbox" />

@@ -5,15 +5,15 @@ import {
   Navigate,
 } from "react-router-dom";
 import { EmailPage, AccountPage, NotFoundPage } from "@pages";
-import { EmailView } from "@features";
+import { InboxItem } from "@features";
 import App from "./App.tsx";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
       <Route path="/account" element={<AccountPage />} />
-      <Route path="/email" element={<EmailPage />}>
-        <Route path=":category/*" element={<EmailView />} />
+      <Route path="/email/:category/*" element={<EmailPage />}>
+        <Route path=":inboxId" element={<InboxItem />} />
       </Route>
       <Route path="/not-found" element={<NotFoundPage />} />
       <Route path="*" element={<Navigate to="/not-found" replace />} />
