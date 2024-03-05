@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { CiStar } from "react-icons/ci";
 import { FaStar } from "react-icons/fa";
 import { Pagination } from "@components";
@@ -17,6 +18,8 @@ export function Sent({
   onPageChange,
   pageSize,
 }: SendProps) {
+  const navigate = useNavigate();
+
   const [starredEmails, setStarredEmails] = useState<string[]>([]);
 
   const toggleStar = (outboxId: string) => {
@@ -25,6 +28,10 @@ export function Sent({
     } else {
       setStarredEmails([...starredEmails, outboxId]);
     }
+  };
+
+  const handleDraftClick = (sent: Items) => {
+    navigate(`/email/sent/${sent._id}`);
   };
 
   const totalPages = Math.ceil(outbox.totalCount / pageSize);
@@ -50,7 +57,11 @@ export function Sent({
           </thead>
           <tbody>
             {outboxItems.map((item: Items) => (
-              <tr key={item._id} className="cursor-pointer hover:bg-gray-200">
+              <tr
+                key={item._id}
+                className="cursor-pointer hover:bg-gray-200"
+                onClick={() => handleDraftClick(item)}
+              >
                 <td>
                   <label>
                     <input type="checkbox" className="checkbox" />

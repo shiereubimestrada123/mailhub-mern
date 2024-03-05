@@ -1,16 +1,20 @@
 import { EmailView, Header, Sidebar } from "@features";
-import { InboxItem } from "@features"; // Import the InboxItem component
-import { useParams } from "react-router-dom"; // Import useParams hook
+import { CategoryItem } from "@features";
+import { useParams } from "react-router-dom";
 
 export function EmailPage() {
-  const { inboxId } = useParams(); // Get inboxId from URL parameters
+  const { category, categoryId } = useParams();
 
   return (
     <>
       <Header />
       <main className="flex">
         <Sidebar />
-        {inboxId ? <InboxItem /> : <EmailView />}
+        {categoryId ? (
+          <CategoryItem categoryId={categoryId} category={category} />
+        ) : (
+          <EmailView />
+        )}
       </main>
     </>
   );

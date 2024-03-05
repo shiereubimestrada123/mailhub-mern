@@ -1,1 +1,1 @@
-export * from "./InboxItem";
+export * from "./CategoryItem";

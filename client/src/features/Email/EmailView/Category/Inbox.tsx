@@ -21,7 +21,6 @@ export function Inbox({
   const navigate = useNavigate();
 
   const [starredEmails, setStarredEmails] = useState<string[]>([]);
-  const [selectedInbox, setSelectedInbox] = useState<Items | null>(null);
 
   const toggleStar = (inboxId: string) => {
     if (starredEmails.includes(inboxId)) {
@@ -32,8 +31,6 @@ export function Inbox({
   };
 
   const handleDraftClick = (inbox: Items) => {
-    setSelectedInbox(inbox);
-    // navigate(`inbox/${inbox._id}`);
     navigate(`/email/inbox/${inbox._id}`);
   };
 
