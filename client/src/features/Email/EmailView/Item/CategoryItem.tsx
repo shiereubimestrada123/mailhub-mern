@@ -1,20 +1,30 @@
+import { useState, useParams } from "react";
+import { ComposeEmailModal, ReplyEmailModal } from "../EmailModal";
 import { FaReply } from "react-icons/fa";
 import { useEmailStore } from "@store";
 import { formatDate } from "@utils";
 
 export function CategoryItem({ categoryId, category }: any) {
+  console.log("categoryId", categoryId);
+
+  const [showReplyModal, setShowReplyModal] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState<any>(null);
+
   const mailbox = useEmailStore((state) => state.mailbox);
+  const isOpenCompose = useEmailStore((state) => state.isOpenCompose);
 
-  const selectedInbox = mailbox.inbox.items.find(
-    (item) => item._id === categoryId,
-  );
+  console.log("mailbox", mailbox);
 
-  const selectedSent = mailbox.outbox.items.find(
-    (item) => item._id === categoryId,
-  );
+  const selectedInbox =
+    mailbox.inbox.items.flat().find((item) => item._id === categoryId) || null;
 
-  console.log("selectedInbox", selectedInbox);
-  console.log("selectedOutbox", selectedSent);
+  const selectedSent =
+    mailbox.outbox.items.find((item) => item._id === categoryId) || null;
+
+  const handleReplyClick = (email: any) => {
+    setSelectedEmail(email);
+    setShowReplyModal(true);
+  };
 
   return (
     <>
@@ -29,7 +39,7 @@ export function CategoryItem({ categoryId, category }: any) {
 
             <div className="flex items-center gap-4">
               <p>{formatDate(selectedInbox.createdAt)}</p>
-              <FaReply />
+              <FaReply onClick={() => handleReplyClick(selectedInbox)} />
             </div>
           </div>
           <p className="p-10 text-center">{selectedInbox.message}</p>
@@ -53,6 +63,15 @@ export function CategoryItem({ categoryId, category }: any) {
         </div>
       )}
       {!selectedInbox && !selectedSent && <div>Item not found</div>}
+
+      {showReplyModal && (
+        <ReplyEmailModal
+          selectedInbox={selectedInbox}
+          setShowReplyModal={setShowReplyModal}
+        />
+      )}
+
+      {isOpenCompose && <ComposeEmailModal />}
     </>
   );
 }

@@ -21,7 +21,7 @@ export function Inbox({
   const navigate = useNavigate();
 
   const [starredEmails, setStarredEmails] = useState<string[]>([]);
-
+  // console.log("inbox", inbox);
   const toggleStar = (inboxId: string) => {
     if (starredEmails.includes(inboxId)) {
       setStarredEmails(starredEmails.filter((id) => id !== inboxId));
@@ -38,6 +38,9 @@ export function Inbox({
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, inbox.totalCount);
   const inboxItems = inbox.items.slice(0, endIndex);
+
+  // Modify inboxItems to only contain the last email in each thread
+  const lastEmails = inboxItems.map((thread: any) => thread[thread.length - 1]);
 
   return (
     <section className="w-full">
@@ -56,11 +59,11 @@ export function Inbox({
             </tr>
           </thead>
           <tbody>
-            {inboxItems.map((item: Items) => (
+            {lastEmails.map((email: Items) => (
               <tr
-                key={item._id}
+                key={email?._id}
                 className="cursor-pointer hover:bg-gray-200"
-                onClick={() => handleDraftClick(item)}
+                onClick={() => handleDraftClick(email)}
               >
                 <td>
                   <label>
@@ -68,22 +71,52 @@ export function Inbox({
                   </label>
                 </td>
                 <td>
-                  {!starredEmails.includes(item._id) ? (
+                  {email && !starredEmails.includes(email._id) ? (
                     <CiStar
                       className="pb-1 text-3xl"
-                      onClick={() => toggleStar(item._id)}
+                      onClick={() => toggleStar(email._id)}
+                    />
+                  ) : (
+                    email && (
+                      <FaStar
+                        className="pb-1 text-3xl"
+                        onClick={() => toggleStar(email._id)}
+                      />
+                    )
+                  )}
+                </td>
+                <td>{email?.to}</td>
+                <td>{email?.subject}</td>{" "}
+              </tr>
+            ))}
+            {/* {lastEmails.map((email: Items) => (
+              <tr
+                key={email._id}
+                className="cursor-pointer hover:bg-gray-200"
+                onClick={() => handleDraftClick(email)}
+              >
+                <td>
+                  <label>
+                    <input type="checkbox" className="checkbox" />
+                  </label>
+                </td>
+                <td>
+                  {!starredEmails.includes(email._id) ? (
+                    <CiStar
+                      className="pb-1 text-3xl"
+                      onClick={() => toggleStar(email._id)}
                     />
                   ) : (
                     <FaStar
                       className="pb-1 text-3xl"
-                      onClick={() => toggleStar(item._id)}
+                      onClick={() => toggleStar(email._id)}
                     />
                   )}
                 </td>
-                <td>{item.to}</td>
-                <td>{item.subject}</td>
+                <td>{email.to}</td>
+                <td>{email.subject}</td>
               </tr>
-            ))}
+            ))} */}
           </tbody>
         </table>
       </div>

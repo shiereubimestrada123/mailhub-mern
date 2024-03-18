@@ -98,7 +98,7 @@ export function ComposeEmailModal() {
   const onSubmit: SubmitHandler<ComposeProps> = async (data) => {
     try {
       const response = await mutateSend(data as any);
-
+      // console.log("response", response);
       const updatedItems = [...mailbox.outbox.items, response.sent];
 
       updatedItems.sort((a, b) => {
@@ -125,7 +125,7 @@ export function ComposeEmailModal() {
 
   return (
     <>
-      <Modal onClose={onClose}>
+      <Modal title="New message" onClose={onClose}>
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex h-[420px] flex-col"

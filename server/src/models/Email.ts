@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const instance = new mongoose.Schema(
+const emailSchema = new mongoose.Schema(
   {
     from: {
       type: String,
@@ -21,12 +21,15 @@ const instance = new mongoose.Schema(
       type: String,
       required: true,
     },
+    threadId: {
+      type: String,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const modelName = "Email";
+const Email = mongoose.model("Email", emailSchema);
 
-export default mongoose.model(modelName, instance);
+export default Email;

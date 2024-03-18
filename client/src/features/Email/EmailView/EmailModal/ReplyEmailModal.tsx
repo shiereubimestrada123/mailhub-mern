@@ -5,7 +5,9 @@ import { Button, FormInput, Modal } from "@components";
 import { Items } from "@types";
 import { useMutation } from "@tanstack/react-query";
 import { post, put } from "@utils";
-import { useEmailStore } from "@store";
+import { useEmailStore, useAuthStore } from "@store";
+
+import { useParams } from "react-router-dom";
 
 type ComposeProps = {
   from: string;
@@ -15,19 +17,16 @@ type ComposeProps = {
   _id: string;
 };
 
-type DraftEmailModalProps = {
-  setSelectedDraft: (draft: Items | null) => void;
-  selectedDraft: Items | null;
+type ReplyEmailModalProps = {
+  selectedInbox: Items | null;
+  setShowReplyModal: (showReplyModal: boolean) => void;
 };
 
-export function DraftEmailModal({
-  setSelectedDraft,
-  selectedDraft,
-}: DraftEmailModalProps) {
-  const navigate = useNavigate();
-
-  const setMailbox = useEmailStore((state) => state.setMailbox);
-  const mailbox = useEmailStore((state) => state.mailbox);
+export function ReplyEmailModal({
+  selectedInbox,
+  setShowReplyModal,
+}: ReplyEmailModalProps) {
+  const userAccount = useAuthStore((state) => state.userAccount);
 
   const {
     register,
@@ -37,116 +36,54 @@ export function DraftEmailModal({
     watch,
   } = useForm<ComposeProps>({
     defaultValues: {
-      from: selectedDraft?.from || "",
-      to: selectedDraft?.to || "",
-      subject: selectedDraft?.subject || "",
-      message: selectedDraft?.message || "",
-      _id: selectedDraft?._id || "",
+      from: userAccount.user?.email || "",
+      // from:
+      //   selectedInbox?.from === userAccount.user?.email
+      //     ? selectedInbox.from
+      //     : userAccount.user?.email,
+      to:
+        selectedInbox?.to === userAccount.user?.email
+          ? selectedInbox.from
+          : selectedInbox?.to,
+      subject: "",
+      message: "",
+      _id: selectedInbox?._id || "",
     },
   });
 
-  const initialSelectedDraft = useRef<Items | null>(selectedDraft);
+  const initialSelectedDraft = useRef<Items | null>(selectedInbox);
 
   useEffect(() => {
-    if (selectedDraft && selectedDraft !== initialSelectedDraft.current) {
+    if (selectedInbox && selectedInbox !== initialSelectedDraft.current) {
       reset({
-        from: selectedDraft.from || "",
-        to: selectedDraft.to || "",
-        subject: selectedDraft.subject || "",
-        message: selectedDraft.message || "",
-        _id: selectedDraft?._id || "",
+        from: userAccount.user?.email || "",
+        to:
+          selectedInbox?.to === userAccount.user?.email
+            ? selectedInbox.from
+            : selectedInbox?.to,
+        subject: selectedInbox.subject || "",
+        message: selectedInbox.message || "",
+        _id: selectedInbox?._id || "",
       });
-      initialSelectedDraft.current = selectedDraft;
+      initialSelectedDraft.current = selectedInbox;
     }
-  }, [selectedDraft, reset]);
+  }, [selectedInbox, userAccount, reset]);
 
-  const { mutateAsync: editDraft, isPending: isEditDraftPending } = useMutation(
-    {
-      mutationFn: async (newEmail) => {
-        return await put(`/email/draft/${selectedDraft?._id}`, newEmail);
-      },
-    },
-  );
-
-  const onClose = async () => {
-    const originalDraft = selectedDraft;
-    const currentValues = watch();
-
-    if (JSON.stringify(originalDraft) !== JSON.stringify(currentValues)) {
-      try {
-        await editDraft(currentValues as any);
-
-        const updatedItems = mailbox.drafts.items.map((item: any) =>
-          item._id === selectedDraft?._id ? currentValues : item,
-        );
-
-        setMailbox({
-          ...mailbox,
-          drafts: {
-            ...mailbox.drafts,
-            items: updatedItems,
-          },
-        });
-
-        navigate("/email/drafts");
-      } catch (error) {
-        console.error("Error saving draft:", error);
-      } finally {
-        setSelectedDraft(null);
-      }
-    }
-
-    setSelectedDraft(null);
+  const onClose = () => {
+    setShowReplyModal(false);
   };
 
-  const { mutateAsync: mutateSend, isPending: isSendPending } = useMutation({
-    mutationFn: async (newEmail) => {
-      return await post(`/email/draft/send/${selectedDraft?._id}`, newEmail);
-    },
-  });
-
   const onSubmit: SubmitHandler<ComposeProps> = async (data) => {
-    try {
-      const response = await mutateSend(data as any);
-
-      const updatedItems = [...mailbox.outbox.items, response.email];
-
-      updatedItems.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-
-      const updatedDrafts = mailbox.drafts.items.filter(
-        (item) => item._id !== response.deletedDraft._id,
-      );
-
-      setMailbox({
-        ...mailbox,
-        drafts: {
-          ...mailbox.drafts,
-          items: updatedDrafts,
-          // totalCount: mailbox.drafts.totalCount + 1,
-        },
-        outbox: {
-          ...mailbox.outbox,
-          items: updatedItems,
-          totalCount: mailbox.outbox.totalCount + 1,
-        },
-      });
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setSelectedDraft(null);
-    }
+    console.log("onSubmit");
   };
 
   return (
-    <Modal title="Draft Email" onClose={onClose}>
+    <Modal title="Reply message" onClose={onClose}>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex h-[420px] flex-col"
       >
-        <input type="hidden" {...register("_id")} value={selectedDraft?._id} />
+        <input type="hidden" {...register("_id")} value={selectedInbox?._id} />
         <FormInput
           id="from"
           type="text"

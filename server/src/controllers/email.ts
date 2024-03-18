@@ -4,6 +4,7 @@ import Email from "../models/Email";
 import Account from "../models/Account";
 import { AuthenticatedRequest } from "./../middleware/authToken";
 import { isValidObjectId } from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 
 export async function getAllEmails(
   request: AuthenticatedRequest,
@@ -33,6 +34,11 @@ export async function getAllEmails(
     const currentUserAccount = await Account.findOne({
       _id: currentUserAccountId,
     })
+      .populate({
+        path: "mailbox.inbox",
+        match: { $or: [{ category: "received" }, { category: "sent" }] }, // Include both received and sent emails
+        options: { sort: { createdAt: -1 } },
+      })
       .populate("mailbox.drafts")
       .populate("mailbox.outbox")
       .populate("mailbox.trash");
@@ -41,51 +47,45 @@ export async function getAllEmails(
       return response.status(404).json({ message: "Account not found" });
     }
 
-    const inboxCount = await Email.countDocuments({
-      _id: { $in: currentUserAccount.mailbox.inbox },
+    const inbox: any[] = currentUserAccount.mailbox.inbox;
+    const drafts: any[] = currentUserAccount.mailbox.drafts;
+    const outbox: any[] = currentUserAccount.mailbox.outbox;
+    const trash: any[] = currentUserAccount.mailbox.trash;
+
+    const inboxThreads: { [key: string]: any[] } = {};
+    inbox.forEach((email) => {
+      const threadId = email.threadId || email._id.toString();
+      if (!inboxThreads[threadId]) {
+        inboxThreads[threadId] = [];
+      }
+      inboxThreads[threadId].push(email);
     });
 
-    const outboxCount = await Email.countDocuments({
-      _id: { $in: currentUserAccount.mailbox.outbox },
-    });
+    const inboxThreadArray = Object.values(inboxThreads);
 
-    const draftsCount = await Email.countDocuments({
-      _id: { $in: currentUserAccount.mailbox.drafts },
-    });
+    const inboxCount = inboxThreadArray.length;
+    const inboxThreadPage = inboxThreadArray.slice(
+      (parsedPage - 1) * parsedPageSize,
+      parsedPage * parsedPageSize
+    );
 
-    const trashCount = await Email.countDocuments({
-      _id: { $in: currentUserAccount.mailbox.trash },
-    });
+    const draftsCount = drafts.length;
+    const draftsPage = drafts.slice(
+      (parsedPage - 1) * parsedPageSize,
+      parsedPage * parsedPageSize
+    );
 
-    const inbox = await Email.find({
-      _id: { $in: currentUserAccount.mailbox.inbox },
-    })
-      .sort({ createdAt: -1 })
-      .skip((parsedPage - 1) * parsedPageSize)
-      .limit(parsedPageSize);
-
-    const outbox = await Email.find({
-      _id: { $in: currentUserAccount.mailbox.outbox },
-    })
-      .sort({ createdAt: -1 })
-      .skip((parsedPage - 1) * parsedPageSize)
-      .limit(parsedPageSize);
-
-    const drafts = await Email.find({
-      _id: { $in: currentUserAccount.mailbox.drafts },
-    })
-      .sort({ createdAt: -1 })
-      .skip((parsedPage - 1) * parsedPageSize)
-      .limit(parsedPageSize);
+    const outboxCount = outbox.length;
+    const outboxPage = outbox.slice(
+      (parsedPage - 1) * parsedPageSize,
+      parsedPage * parsedPageSize
+    );
 
     const emails = {
-      inbox: { items: inbox, totalCount: inboxCount },
-      drafts: { items: drafts, totalCount: draftsCount },
-      outbox: { items: outbox, totalCount: outboxCount },
-      trash: {
-        items: currentUserAccount.mailbox.trash,
-        totalCount: trashCount,
-      },
+      inbox: { items: inboxThreadPage, totalCount: inboxCount },
+      drafts: { items: draftsPage, totalCount: draftsCount },
+      outbox: { items: outboxPage, totalCount: outboxCount },
+      trash: { items: trash, totalCount: trash.length },
       pageSize: parsedPageSize,
     };
 
@@ -119,12 +119,15 @@ export async function sendEmail(
         .json({ message: "Mailbox not found for sender account" });
     }
 
+    const newThreadId = uuidv4();
+
     const newEmailSend = new Email({
       from: senderAccount.email,
       to: request.body.to,
       subject: request.body.subject,
       message: request.body.message,
       category: "sent",
+      threadId: newThreadId, // Assign the same threadId to the sent email
     });
     const savedEmailSend = await newEmailSend.save();
 
@@ -146,7 +149,8 @@ export async function sendEmail(
       to: receiverAccount.email,
       subject: request.body.subject,
       message: request.body.message,
-      category: "received", // Assuming the category for received emails is "received"
+      category: "received",
+      threadId: newThreadId, // Assign the same threadId to the received email
     });
     const savedEmailIn = await newEmailReceive.save();
 
@@ -296,5 +300,71 @@ export async function sendDraftAsEmail(
   } catch (error) {
     console.error("Error sending draft as email:", error);
     response.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function handleReplyMessage(
+  request: AuthenticatedRequest,
+  response: Response
+) {
+  try {
+    // Extract data from the request body including the threadId
+    const { from, to, subject, message, threadId } = request.body;
+
+    // Perform validation using express-validator
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+      return response
+        .status(400)
+        .json({ success: false, errors: errors.array() });
+    }
+
+    // Process the reply message logic
+    // Save the reply message to the database with the provided threadId
+    const newReply = new Email({
+      from,
+      to,
+      subject,
+      message,
+      category: "received",
+      threadId, // Use the same threadId as the original email
+    });
+
+    const savedReply = await newReply.save();
+
+    // Save the reply message in the "received" category as well
+    let receiverAccount = await Account.findOne({ email: to });
+    if (!receiverAccount) {
+      return response
+        .status(404)
+        .json({ message: "Receiver account not found" });
+    }
+
+    if (!receiverAccount.mailbox) {
+      return response
+        .status(404)
+        .json({ message: "Mailbox not found for receiver account" });
+    }
+    console.log("test", savedReply._id);
+    // Add the reply message to the inbox
+    receiverAccount.mailbox.inbox.push(savedReply._id);
+    await receiverAccount.save();
+
+    // Log information for debugging
+    // console.log("Saved reply:", savedReply);
+    // console.log("Receiver account before adding to inbox:", receiverAccount);
+
+    // Send a response back to the client
+    response.status(200).json({
+      success: true,
+      message: "Reply message sent successfully",
+      reply: savedReply,
+    });
+  } catch (error) {
+    // Log any errors that occur during reply message handling
+    console.error("Error handling reply message:", error);
+    response
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 }

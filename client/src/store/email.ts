@@ -6,12 +6,12 @@ type EmailState = {
   setMailbox: (mailbox: any) => void;
   getMailBox: (mailbox: any) => void;
 
-  selectedItem: string;
-  isOpenCompose: boolean;
-  isOpenDraft: boolean;
   setSelectedItem: (label: string) => void;
+  selectedItem: string;
   setIsOpenCompose: (isOpen: boolean) => void;
+  isOpenCompose: boolean;
   setIsOpenDraft: (isOpen: boolean) => void;
+  isOpenDraft: boolean;
 };
 
 export const useEmailStore = create<EmailState>((set) => ({
